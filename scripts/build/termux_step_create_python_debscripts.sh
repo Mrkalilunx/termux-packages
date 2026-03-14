@@ -11,40 +11,35 @@ termux_step_create_python_debscripts() {
 
 	local py_file_in_lib_python="" pip_metadata_file=""
 
-	# if the package does not contain any .py files in
-	# $TERMUX_PREFIX/lib/python$TERMUX_PYTHON_VERSION,
-	# then debpython (py3compile and py3clean) are not
-	# necessary or not currently supported for this package
+	# 如果包在 $TERMUX_PREFIX/lib/python$TERMUX_PYTHON_VERSION 中不包含任何 .py 文件，
+	# 那么对于此包，debpython（py3compile 和 py3clean）是不必要的或当前不支持
 	if [[ -d "$_package_python_home" ]]; then
 		py_file_in_lib_python="$(find "$_package_python_home" -name "*.py" -print -quit)"
 	fi
 
-	# metadata file that at least some packages have, which contains the 'pip'-facing name of the
-	# package and any PyPi dependencies it has.
+	# 至少某些包拥有的元数据文件，其中包含包的 'pip' 面向名称及其任何 PyPi 依赖项。
 	if [[ -d "$_package_python_home/site-packages" ]]; then
 		pip_metadata_file="$(find "$_package_python_home/site-packages" -name "METADATA" -print -quit)"
 	fi
 
-	# add the internal 'pip'-facing name of the package to the 'pip install' dependencies if it exists
-	# in the 'METADATA' file and the 'METADATA' file also marks the package as depending
-	# on any other 'pip'-facing packages, which will install all the 'pip'-facing dependencies
-	# the software marks itself as depending on from PyPi that are not already installed from other Termux packages.
-	# if more than one 'METADATA' file is detected, this condition will evaluate false so nothing will happen.
+	# 如果包的内部 'pip' 面向名称存在于 'METADATA' 文件中，并且 'METADATA' 文件也将包标记为依赖于
+	# 任何其他 'pip' 面向包，则将其添加到 'pip install' 依赖项，这将安装软件标记为从 PyPi 依赖的
+	# 所有 'pip' 面向依赖项，而这些依赖项尚未从其他 Termux 包安装。
+	# 如果检测到多个 'METADATA' 文件，则此条件将评估为 false，因此不会发生任何事情。
 	if [[ -f "$pip_metadata_file" ]] && grep -q '^Requires-Dist' "$pip_metadata_file"; then
 		local package_pip_name="$(grep 'Name:' "$pip_metadata_file" | cut -d' ' -f2)"
 		_package_python_deps+=" $package_pip_name"
 	fi
 
-	# if there are no .py files in $TERMUX_PREFIX/lib/python$TERMUX_PYTHON_VERSION/,
-	# and the package has an empty $_package_python_deps, then this function does not need to do anything
+	# 如果 $TERMUX_PREFIX/lib/python$TERMUX_PYTHON_VERSION/ 中没有 .py 文件，
+	# 并且包具有空的 $_package_python_deps，则此函数不需要执行任何操作
 	if [[ -z "$py_file_in_lib_python" ]] && [[ -z "${_package_python_deps}" ]]; then
 		return
 	fi
 
-	# if a postinst script does not already exist, create a new one
-	# but if the postinst script already exists and has 'exit 0'
-	# as its last line, remove that line so that it does not
-	# prevent execution of the additional commands
+	# 如果 postinst 脚本不存在，则创建一个新的
+	# 但如果 postinst 脚本已存在并且最后一行是 'exit 0'，
+	# 则删除该行，以防止执行其他命令
 	if [[ ! -f postinst ]]; then
 		echo "#!${TERMUX_PREFIX_CLASSICAL}/bin/sh" >postinst
 		chmod 0755 postinst
@@ -52,8 +47,7 @@ termux_step_create_python_debscripts() {
 		sed -i '$d' postinst
 	fi
 
-	# if the package format is .deb, only run the script
-	# if the package is being configured (not failed)
+	# 如果包格式是 .deb，则仅在配置包（而非失败）时运行脚本
 	if [[ "$TERMUX_PACKAGE_FORMAT" == "debian" ]]; then
 		cat <<-POSTINST_EOF >>postinst
 			if [ "\$1" != "configure" ]; then
@@ -62,8 +56,8 @@ termux_step_create_python_debscripts() {
 		POSTINST_EOF
 	fi
 
-	# if the package has runtime dependencies requiring pip,
-	# make this script install them
+	# 如果包具有需要 pip 的运行时依赖项，
+	# 则使此脚本安装它们
 	if [[ -n "${_package_python_deps}" ]]; then
 		local pip_package_name="python-pip" upgrade_flag="--upgrade"
 
@@ -71,12 +65,10 @@ termux_step_create_python_debscripts() {
 			pip_package_name+="-glibc"
 		fi
 
-		# if the list of dependencies to install from PyPi has the name of
-		# the current package with any 'python-' prefix stripped from it anywhere in it,
-		# do not use the '--upgrade' argument to pip, in order to avoid overwriting
-		# the non-PyPi local package files with a different software with the same name,
-		# or the same package of an incorrect version, from PyPi.
-		# this is particularly important for the 'nala' package, for example.
+		# 如果要从 PyPi 安装的依赖项列表包含当前包的名称（其中任何 'python-' 前缀都被剥离），
+		# 则不要对 pip 使用 '--upgrade' 参数，以避免用同名但不同的软件或
+		# 来自 PyPi 的错误版本的同名软件覆盖非 PyPi 本地包文件。
+		# 这对于 'nala' 包尤为重要。
 		if [[ " $(tr ' ' '\n' <<<"${_package_python_deps}" | sed "s/'//g; s/</ /g; s/>/ /g; s/=/ /g" | awk '{printf $1 " "}')" =~ " ${_package_name//python-/} " ]]; then
 			upgrade_flag=""
 		fi
@@ -86,39 +78,35 @@ termux_step_create_python_debscripts() {
 			LD_PRELOAD='' LDFLAGS="-lpython$TERMUX_PYTHON_VERSION" MATHLIB="m" "${TERMUX_PREFIX}/bin/pip3" install ${upgrade_flag} ${_package_python_deps}
 		POSTINST_EOF
 
-		# ensure that pip is added as a dependency to all
-		# packages that run the 'pip' command during installation.
+		# 确保将 pip 添加为所有在安装期间运行 'pip' 命令的包的依赖项。
 		if ([[ "$TERMUX_PACKAGE_FORMAT" == "debian" ]] && ! grep -q -E "Depends.*$pip_package_name(,|$)" control) || ([[ "$TERMUX_PACKAGE_FORMAT" == "pacman" ]] && ! grep -q "depend = $pip_package_name" .PKGINFO); then
 			termux_error_exit "'$_package_name' must depend on '$pip_package_name' because it needs to run 'pip' during installation!"
 		fi
 	fi
 
-	# if the package does not contain any .py files in
-	# $TERMUX_PREFIX/lib/python$TERMUX_PYTHON_VERSION,
-	# then this function does not need to do anything else
+	# 如果包在 $TERMUX_PREFIX/lib/python$TERMUX_PYTHON_VERSION 中不包含任何 .py 文件，
+	# 则此函数不需要执行其他任何操作
 	if [[ -z "$py_file_in_lib_python" ]]; then
 		return
 	fi
 
-	# post-inst script to generate *.pyc files
+	# 生成 *.pyc 文件的 post-inst 脚本
 	cat <<-POSTINST_EOF >>postinst
 		if [ -f "${TERMUX_PREFIX}/bin/py3compile" ]; then
 			LD_PRELOAD='' "${TERMUX_PREFIX}/bin/py3compile" -p "$_package_name" "${TERMUX_PREFIX}/lib/python${TERMUX_PYTHON_VERSION}/"
 		fi
 	POSTINST_EOF
 
-	# make the last command of the postinst script 'exit 0'
-	# because if the previous last command was a condition,
-	# and the condition failed, then the postinst script could
-	# fail, which would not actually be the desired result
+	# 使 postinst 脚本的最后一条命令为 'exit 0'
+	# 因为如果上一个最后一条命令是条件，并且条件失败，
+	# 则 postinst 脚本可能会失败，而这实际上不是期望的结果
 	cat <<-POSTINST_EOF >>postinst
 		exit 0
 	POSTINST_EOF
 
-	# if a prerm script does not already exist, create a new one
-	# but if the prerm script already exists and has 'exit 0'
-	# as its last line, remove that line so that it does not
-	# prevent execution of the additional commands
+	# 如果 prerm 脚本不存在，则创建一个新的
+	# 但如果 prerm 脚本已存在并且最后一行是 'exit 0'，
+	# 则删除该行，以防止执行其他命令
 	if [[ ! -f prerm ]]; then
 		echo "#!${TERMUX_PREFIX_CLASSICAL}/bin/sh" >prerm
 		chmod 0755 prerm
@@ -126,8 +114,7 @@ termux_step_create_python_debscripts() {
 		sed -i '$d' prerm
 	fi
 
-	# if the package format is .deb, only run the script
-	# if the package is being removed (not failed)
+	# 如果包格式是 .deb，则仅在删除包（而非失败）时运行脚本
 	if [[ "$TERMUX_PACKAGE_FORMAT" == "debian" ]]; then
 		cat <<-PRERM_EOF >>prerm
 			if [ "\$1" != "remove" ]; then
@@ -136,22 +123,21 @@ termux_step_create_python_debscripts() {
 		PRERM_EOF
 	fi
 
-	# pre-rm script to cleanup runtime-generated files.
+	# 清理运行时生成的文件的 pre-rm 脚本。
 	cat <<-PRERM_EOF >>prerm
 		if [ -f "${TERMUX_PREFIX}/bin/py3clean" ]; then
 			LD_PRELOAD='' "${TERMUX_PREFIX}/bin/py3clean" -p "$_package_name"
 		fi
 	PRERM_EOF
 
-	# make the last command of the prerm script 'exit 0'
-	# because if the previous last command was a condition,
-	# and the condition failed, then the prerm script could
-	# fail, which would not actually be the desired result
+	# 使 prerm 脚本的最后一条命令为 'exit 0'
+	# 因为如果上一个最后一条命令是条件，并且条件失败，
+	# 则 prerm 脚本可能会失败，而这实际上不是期望的结果
 	cat <<-PRERM_EOF >>prerm
 		exit 0
 	PRERM_EOF
 
-	# running py3compile in a package for pacman during a package update
+	# 在包更新期间为 pacman 包运行 py3compile
 	if [[ "$TERMUX_PACKAGE_FORMAT" == "pacman" ]] && ! grep -qs 'post_install' postupg; then
 		echo "post_install" >>postupg
 	fi

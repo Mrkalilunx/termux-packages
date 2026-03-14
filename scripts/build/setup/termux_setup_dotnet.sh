@@ -1,7 +1,7 @@
 # shellcheck shell=bash disable=SC1091 disable=SC2086 disable=SC2155 disable=SC2164
 termux_setup_dotnet() {
-	# Microsoft distribution of dotnet enables telemetry
-	# This has no effect on Termux dotnet (telemetry is already disabled)
+	# Microsoft 分发的 dotnet 启用遥测
+	# 这对 Termux dotnet 没有影响（遥测已被禁用）
 	export DOTNET_CLI_TELEMETRY_OPTOUT=1
 
 	export DOTNET_TARGET_NAME="linux-bionic"
@@ -20,8 +20,8 @@ termux_setup_dotnet() {
 	if [[ "${TERMUX_ON_DEVICE_BUILD}" == "true" ]]; then
 		if [[ -z "$(command -v dotnet)" ]]; then
 			cat <<- EOL >&2
-			Package 'dotnet8.0' is not installed.
-			You can install it with
+			未安装 'dotnet8.0' 软件包。
+			您可以通过以下方式安装：
 
 			pkg install dotnet8.0
 
@@ -32,7 +32,7 @@ termux_setup_dotnet() {
 		local DOTNET_VERSION=$(dotnet --version | awk '{ print $2 }')
 		if [[ -n "${TERMUX_DOTNET_VERSION-}" ]] && [[ "${TERMUX_DOTNET_VERSION-}" != "${DOTNET_VERSION//.*}"* ]]; then
 			cat <<- EOL >&2
-			WARN: Mismatch dotnet version!
+			警告：dotnet 版本不匹配！
 			TERMUX_DOTNET_VERSION = ${TERMUX_DOTNET_VERSION}
 			DOTNET_VERSION        = ${DOTNET_VERSION}
 			EOL
@@ -46,20 +46,20 @@ termux_setup_dotnet() {
 
 	export PATH="${HOME}/.dotnet:${HOME}/.dotnet/tools:${PATH}"
 
-	# install targeting packs that would not be found in nuget.org
+	# 安装在 nuget.org 中找不到的目标包
 	local _DOTNET_ROOT="${TERMUX_PREFIX}/lib/dotnet"
 	if [[ ! -d "${_DOTNET_ROOT}" ]]; then
-		echo "WARN: ${_DOTNET_ROOT} is not a directory! Build may fail! Skipping install symlinks." >&2
+		echo "警告：${_DOTNET_ROOT} 不是目录！构建可能会失败！跳过安装符号链接。" >&2
 		return
 	fi
 	if [[ ! -d "${HOME}/.dotnet/packs" ]]; then
-		echo "ERROR: ${HOME}/.dotnet/packs is not a directory!" >&2
+		echo "错误：${HOME}/.dotnet/packs 不是目录！" >&2
 		return 1
 	fi
 
 	pushd "${HOME}/.dotnet/packs"
 
-	# point to use our own SDK
+	# 指向使用我们自己的 SDK
 	local targeting_pack version
 	for targeting_pack in "${_DOTNET_ROOT}"/packs/*; do
 		if [[ -d "$(basename "${targeting_pack}")" ]]; then
@@ -75,9 +75,9 @@ termux_setup_dotnet() {
 		fi
 	done
 
-	# ours (older) SDK sometimes out of sync with Microsoft (newer) SDK
-	# usually causes build failure on unofficial supported RID, eg: linux-bionic-x86
-	# so we need to point latest version to what old version we have
+	# 我们的（较旧的）SDK 有时与 Microsoft（较新的）SDK 不同步
+	# 通常会导致在非官方支持的 RID 上构建失败，例如：linux-bionic-x86
+	# 所以我们需要将最新版本指向我们拥有的旧版本
 	local dotnet_runtime_versions=$(dotnet --list-runtimes | awk '{ print $2 }' | sort -Vu)
 	local latest_dotnet8_version=$(echo "${dotnet_runtime_versions}" | grep "^8.0." | tail -n1)
 	local latest_dotnet9_version=$(echo "${dotnet_runtime_versions}" | grep "^9.0." | tail -n1)
@@ -105,16 +105,16 @@ termux_setup_dotnet() {
 	popd
 
 	pushd "${HOME}/.dotnet"
-	echo "INFO: Installed symbolic links:"
+	echo "信息：已安装的符号链接："
 	find ./packs -mindepth 1 -maxdepth 3 -type l | sort
 	popd
 }
 
 termux_dotnet_kill() {
-	# when "dotnet build-server shutdown" is not enough
+	# 当 "dotnet build-server shutdown" 不够时
 	local dotnet_process
 	dotnet_process="$(pgrep -a dotnet)" || return 0
-	echo "WARN: Dangling process, forcibly killing"
+	echo "警告：发现悬挂进程，正在强制终止"
 	echo "${dotnet_process}"
 	pkill -9 dotnet || :
 }

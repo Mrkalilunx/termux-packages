@@ -1,30 +1,31 @@
-# Takes in a list of GraphQL query snippets
+# shellcheck shell=bash
+# 接收 GraphQL 查询片段列表
 termux_github_graphql() {
 	local -a GITHUB_GRAPHQL_QUERIES=( "$@" )
 	local pkg_json; pkg_json="$(jq -c -n '$ARGS.positional' --args "${__GITHUB_PACKAGES[@]}")"
 
-	# if there are no github graphql queries to make, do nothing because otherwise this error would happen:
+	# 如果没有要进行的 github graphql 查询，则什么也不做，否则会出现此错误：
 	# termux_github_graphql.sh: line 12: GITHUB_GRAPHQL_QUERIES[$BATCH * $BATCH_SIZE]: unbound variable
 	if (( ${#GITHUB_GRAPHQL_QUERIES[@]} == 0 )); then
 		return
 	fi
 
-	# Batch size for fetching tags, 100 seems to work consistently.
+	# 用于获取标签的批处理大小，100 似乎始终有效。
 	local BATCH BATCH_SIZE=100
-	# echo "# vim: ft=graphql" > /tmp/query-12345 # Uncomment for debugging GraphQL queries
+	# echo "# vim: ft=graphql" > /tmp/query-12345 # 取消注释以调试 GraphQL 查询
 	# echo "# $(date -Iseconds)" >> /tmp/query-12345
 	for (( BATCH = 0; ${#GITHUB_GRAPHQL_QUERIES[@]} >= BATCH_SIZE * BATCH ; BATCH++ )); do
 
-		echo "Starting batch $BATCH at: ${GITHUB_GRAPHQL_QUERIES[$BATCH * $BATCH_SIZE]//\\/}" >&2
+		echo "Starting batch $BATCH at: ${GITHUB_GRAPHQL_QUERIES[$BATCH * $BATCH_SIZE]//\/}" >&2
 
-		# JSON strings cannot contain tabs or newlines
-		# so shutup shellcheck complaining about escapes in single quotes
+		# JSON 字符串不能包含制表符或换行符
+		# 所以让 shellcheck 闭嘴，不要抱怨单引号中的转义
 		local QUERY
 
-		# Start the GraphQL query with our two fragments for getting the latest tag from a release, and from refs/tags
-		# These are defined only if needed.
+		# 使用我们的两个片段开始 GraphQL 查询，以从发布和 refs/tags 获取最新标签
+		# 这些仅在需要时定义。
 
-		# _latest_release_tag returns latestRelease.tagName from the repo its querying
+		# _latest_release_tag 从查询的仓库返回 latestRelease.tagName
 		grep -q '_latest_release_tag' <<< "${GITHUB_GRAPHQL_QUERIES[@]:$BATCH * $BATCH_SIZE:$BATCH_SIZE}" && {
 			QUERY+="$(printf '%s\n' \
 			'fragment _latest_release_tag on Repository {' \
@@ -32,7 +33,7 @@ termux_github_graphql() {
 			'}')"
 		}
 
-		# _latest_regex returns the (20) latest tags by commit date
+		# _latest_regex 按提交日期返回 (20) 个最新标签
 		grep -q '_latest_regex' <<< "${GITHUB_GRAPHQL_QUERIES[@]:$BATCH * $BATCH_SIZE:$BATCH_SIZE}" && {
 			QUERY+="$(printf '%s\n' \
 			'fragment _latest_regex on Repository {' \
@@ -42,7 +43,7 @@ termux_github_graphql() {
 			'}')"
 		}
 
-		# _newest_tag returns the (1) newest tag by commit date
+		# _newest_tag 按提交日期返回 (1) 个最新标签
 		grep -q '_newest_tag' <<< "${GITHUB_GRAPHQL_QUERIES[@]:$BATCH * $BATCH_SIZE:$BATCH_SIZE}" && {
 			QUERY+="$(printf '%s\n' \
 			'fragment _newest_tag on Repository {' \
@@ -54,23 +55,24 @@ termux_github_graphql() {
 
 		QUERY+='query {'
 
-		# Fill out the query body with the package repos we need to query for updates
-		# Lastly fetch the rate limit utilization
+		# 用我们需要查询更新的包仓库填充查询主体
+		# 最后获取速率限制使用情况
 		printf -v QUERY '%s\n' \
 				"${QUERY}" \
 				"${GITHUB_GRAPHQL_QUERIES[@]:$BATCH * $BATCH_SIZE:$BATCH_SIZE}" \
 				'ratelimit: rateLimit { cost limit remaining used resetAt }' \
 				'}' \
 
-		# echo "# Batch: $BATCH" >> /tmp/query-12345 # Uncomment for debugging GraphQL queries
-		# printf '%s' "${QUERY}"  >> /tmp/query-12345 # Uncomment for debugging GraphQL queries
+		# echo "# Batch: $BATCH" >> /tmp/query-12345 # 取消注释以调试 GraphQL 查询
+		# printf '%s' "${QUERY}"  >> /tmp/query-12345 # 取消注释以调试 GraphQL 查询
 
-		# We use graphql intensively so we should slowdown our requests to avoid hitting github ratelimits.
+		# 我们大量使用 graphql，因此应该减慢请求速度以避免达到 github 的速率限制。
 		sleep 5
 
 		local response
-		# Try up to 3 times to fetch the batch, GitHub's GraphQL API can be a bit unreliable at times.
-		if ! response="$(printf '{ "query": "%s" }' "${QUERY//$'\n'/ }" | curl -fL \
+		# 尝试最多 3 次获取批处理，GitHub 的 GraphQL API 有时可能不太可靠。
+		if ! response="$(printf '{ "query": "%s" }' "${QUERY//
+\n'/ }" | curl -fL \
 			--retry 3 --retry-delay 5 \
 			--no-progress-meter \
 			-H "Authorization: token ${GITHUB_TOKEN}" \
@@ -107,8 +109,8 @@ termux_github_graphql() {
 			| ($pkgs[$idx] | split("/")[-1]) as $pkgName   # Get package name from bash array
 			| "GIT|\($pkgName)|\($tag)"                    # Print results
 			' <<< "$response" 2>/dev/null)" || {
-				echo "something ain't right with this response"
-			}
+			echo "此响应有问题"
+		}
 		# # Uncomment for debugging GraphQL queries
 		# jq '.' <<< "$response" >> /tmp/query-12345
 		# echo "$ret" >> /tmp/query-12345

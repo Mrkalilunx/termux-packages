@@ -5,9 +5,8 @@ termux_extract_dep_info() {
 	PKG="$1"
 	PKG_DIR="$2"
 
-	# set TERMUX_SUBPKG_PLATFORM_INDEPENDENT to
-	# parent package's value and override if
-	# needed
+	# 将 TERMUX_SUBPKG_PLATFORM_INDEPENDENT 设置为
+	# 父包的值，并在需要时覆盖
 	TERMUX_PKG_ON_DEVICE_BUILD_NOT_SUPPORTED="false"
 	TERMUX_PKG_PLATFORM_INDEPENDENT="false"
 	TERMUX_PKG_REVISION="0"

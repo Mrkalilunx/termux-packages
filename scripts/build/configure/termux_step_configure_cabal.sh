@@ -7,7 +7,7 @@ termux_step_configure_cabal() {
 		QUIET_BUILD="-v0"
 	fi
 
-	# Avoid gnulib wrapping of functions when cross compiling. See
+	# 交叉编译时避免 gnulib 包装函数。参见
 	# http://wiki.osdev.org/Cross-Porting_Software#Gnulib
 	# https://gitlab.com/sortix/sortix/wikis/Gnulib
 	# https://github.com/termux/termux-packages/issues/76
@@ -63,7 +63,7 @@ termux_step_configure_cabal() {
 	AVOID_GNULIB+=" gl_cv_header_working_fcntl_h=yes"
 	AVOID_GNULIB+=" gl_cv_C_locale_sans_EILSEQ=yes"
 
-	# NOTE: We do not want to quote AVOID_GNULIB as we want word expansion.
+	# 注意：我们不希望对 AVOID_GNULIB 加引号，因为我们需要单词扩展。
 	# shellcheck disable=SC2086
 	env $AVOID_GNULIB cabal --config="$TERMUX_CABAL_CONFIG" configure \
 		$TERMUX_GHC_OPTIMISATION \

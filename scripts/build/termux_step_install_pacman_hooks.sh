@@ -3,7 +3,7 @@ termux_step_install_pacman_hooks() {
 
 	local sed="sed -e s|@TERMUX_PREFIX@|${TERMUX_PREFIX}|g -e s|@TERMUX_PREFIX_TARGET@|${TERMUX_PREFIX:1}|g -e s|@TERMUX_ARCH@|${TERMUX_ARCH}|g"
 
-	# Installing hooks
+	# 安装钩子
 	local hooks
 	hooks=$(find $TERMUX_PKG_BUILDER_DIR -mindepth 1 -maxdepth 1 -name "*.alpm.hook")
 	if [[ -n "${hooks}" ]]; then
@@ -14,7 +14,7 @@ termux_step_install_pacman_hooks() {
 		done
 	fi
 
-	# Installing scripts
+	# 安装脚本
 	local scripts
 	scripts=$(find $TERMUX_PKG_BUILDER_DIR -mindepth 1 -maxdepth 1 -name "*.alpm.script")
 	if [[ -n "${scripts}" ]]; then

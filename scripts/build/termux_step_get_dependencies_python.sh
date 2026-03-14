@@ -1,9 +1,9 @@
 termux_step_get_dependencies_python() {
 	if [ "$TERMUX_PKG_SETUP_PYTHON" = "true" ]; then
-		# python pip setup
+		# python pip 设置
 		termux_setup_python_pip
 
-		# installing python modules
+		# 安装 python 模块
 		LDFLAGS+=" -Wl,--as-needed,-lpython${TERMUX_PYTHON_VERSION}"
 		local pip
 		local pip_pkgs="$TERMUX_PKG_PYTHON_COMMON_BUILD_DEPS, "
@@ -26,7 +26,7 @@ termux_step_get_dependencies_python() {
 			[ "$TERMUX_FORCE_BUILD_DEPENDENCIES" = "true" ] && termux_add_package_to_built_packages_list "$name_python_module_termux"
 		done
 
-		# adding and setting values ​​to work properly with python modules
+		# 添加和设置值以使 python 模块正常工作
 		export PYTHONPATH="${TERMUX_PYTHON_CROSSENV_BUILDHOME}:${TERMUX_PYTHON_HOME}/site-packages"
 		if [ "$TERMUX_ON_DEVICE_BUILD" = "false" ]; then
 			export TERMUX_PYTHON_MAINPATH="${PYTHONPATH}:${TERMUX_PYTHON_CROSSENV_BUILDHOME}/site-packages"

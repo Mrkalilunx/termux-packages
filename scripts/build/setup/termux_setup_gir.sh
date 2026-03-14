@@ -31,14 +31,14 @@ termux_setup_gir() {
 	# Used by gi-cross-launcher:
 	export TERMUX_PKG_GIR_PRE_GENERATED_DUMP_DIR="$TERMUX_PKG_BUILDER_DIR/gir/${TERMUX_PKG_VERSION##*:}"
 
-        ## Generating dumps is pretty easy.
-        ### 1. Install all package dependencies to your linux PC.
-        ### 2. `export GI_SCANNER_DEBUG=save-temps`.
-        ### 3. Compile package (configure+make, meson+ninja, cmake+ninja, etc.)
-        ### 4. Go to build folder. There will be folder/s like `tmp-introspectedXXXXXXXX` 
-        ###    where every X is random letter or number. These folder contain a '.c' file and 'dump.xml'.
-        ### 5. You should take 'dump.xml' and rename it to the same name as '.c' file but keep '.xml' extension.
-        ### 6. Put this xml to "$TERMUX_PKG_BUILDER_DIR/gir/${TERMUX_PKG_VERSION##*:}" folder of the package.
+        ## 生成转储文件非常简单。
+        ### 1. 将所有软件包依赖项安装到您的 Linux PC 上。
+        ### 2. `export GI_SCANNER_DEBUG=save-temps`。
+        ### 3. 编译软件包（configure+make、meson+ninja、cmake+ninja 等）
+        ### 4. 进入构建文件夹。会有像 `tmp-introspectedXXXXXXXX` 这样的文件夹
+        ###    其中每个 X 是随机字母或数字。这些文件夹包含一个 '.c' 文件和 'dump.xml'。
+        ### 5. 您应该获取 'dump.xml' 并将其重命名为与 '.c' 文件相同的名称，但保留 '.xml' 扩展名。
+        ### 6. 将此 xml 放置到软件包的 "$TERMUX_PKG_BUILDER_DIR/gir/${TERMUX_PKG_VERSION##*:}" 文件夹中。
 
 	local _GIR_CROSS_FOLDER="$TERMUX_COMMON_CACHEDIR/gir-cross"
 	local bin="$_GIR_CROSS_FOLDER/bin"

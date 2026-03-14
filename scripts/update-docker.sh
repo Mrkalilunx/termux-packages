@@ -10,9 +10,9 @@ LATEST=$(docker inspect --format "{{.Id}}" $IMAGE)
 RUNNING=$(docker inspect --format "{{.Image}}" $CONTAINER)
 
 if [ $LATEST = $RUNNING ]; then
-	echo "Image '$IMAGE' used in the container '$CONTAINER' is already up to date"
+	echo "容器 '$CONTAINER' 中使用的镜像 '$IMAGE' 已经是最新的"
 else
-	echo "Image '$IMAGE' used in the container '$CONTAINER' has been updated - removing the outdated container"
+	echo "容器 '$CONTAINER' 中使用的镜像 '$IMAGE' 已更新 - 正在删除过时的容器"
 	docker stop $CONTAINER
 	docker rm -f $CONTAINER
 fi

@@ -3,8 +3,8 @@ termux_setup_rust() {
 	if [[ "${TERMUX_ON_DEVICE_BUILD}" == "true" ]]; then
 		if [[ -z "$(command -v rustc)" ]]; then
 			cat <<- EOL
-			Package 'rust' is not installed.
-			You can install it with
+			未安装 'rust' 软件包。
+			您可以通过以下方式安装：
 
 			pkg install rust
 
@@ -15,7 +15,7 @@ termux_setup_rust() {
 		local RUSTC_VERSION=$(rustc --version | awk '{ print $2 }')
 		if [[ -n "${TERMUX_RUST_VERSION-}" && "${TERMUX_RUST_VERSION-}" != "${RUSTC_VERSION}" ]]; then
 			cat <<- EOL >&2
-			WARN: On device build with old rust version is not possible!
+			警告：在设备上使用旧版本的 rust 构建是不可能的！
 			TERMUX_RUST_VERSION = ${TERMUX_RUST_VERSION}
 			RUSTC_VERSION       = ${RUSTC_VERSION}
 			EOL

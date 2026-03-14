@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# This provides an utility to run binaries under termux environment via proot.
+# 此函数提供实用工具，通过 proot 在 termux 环境下运行二进制文件。
 termux_setup_proot() {
 	local TERMUX_PROOT_VERSION=5.3.0
 	local TERMUX_QEMU_VERSION=7.2.0-1
@@ -12,7 +12,7 @@ termux_setup_proot() {
 	[[ -d "$TERMUX_PROOT_BIN" ]] && return
 
 	if ! [[ -d "$TERMUX_PREFIX/opt/aosp" ]]; then
-		echo "ERROR: Add 'aosp-libs' to TERMUX_PKG_BUILD_DEPENDS. 'proot' cannot run without it."
+		echo "错误：将 'aosp-libs' 添加到 TERMUX_PKG_BUILD_DEPENDS。'proot' 无法在没有它的情况下运行。"
 		exit 1
 	fi
 
@@ -35,7 +35,7 @@ termux_setup_proot() {
 		TERMUX_PROOT_QEMU="-q $TERMUX_PROOT_BIN/qemu-$TERMUX_ARCH"
 	fi
 
-	# NOTE: We include current PATH too so that host binaries also become available under proot.
+	# 注意：我们也包含当前的 PATH，以便主二进制文件在 proot 下也可用。
 	cat <<-EOF >"$TERMUX_PROOT_BIN/$TERMUX_PROOT_BIN_NAME"
 		#!/bin/bash
 		env -i \

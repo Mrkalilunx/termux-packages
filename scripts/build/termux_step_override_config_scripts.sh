@@ -4,11 +4,10 @@ termux_step_override_config_scripts() {
 		return
 	fi
 
-	# Make $TERMUX_PREFIX/bin/sh executable on the builder, so that build
-	# scripts can assume that it works on both builder and host later on:
+	# 使 $TERMUX_PREFIX/bin/sh 在构建器上可执行，以便构建脚本可以假设它在构建器和主机上都能工作：
 	ln -sf /bin/sh "$TERMUX_PREFIX/bin/sh"
 
-	# Does this package or its build depend on 'libllvm'?
+	# 此包或其构建是否依赖于 'libllvm'？
 	if [[ "$TERMUX_PKG_DEPENDS" != "${TERMUX_PKG_DEPENDS/libllvm/}" ||
 		"$TERMUX_PKG_BUILD_DEPENDS" != "${TERMUX_PKG_BUILD_DEPENDS/libllvm/}" ]]; then
 		LLVM_DEFAULT_TARGET_TRIPLE="$TERMUX_HOST_PLATFORM"
@@ -29,7 +28,7 @@ termux_step_override_config_scripts() {
 		chmod 755 "$TERMUX_PREFIX/bin/llvm-config"
 	fi
 
-	# Does this package or its build depend on 'postgresql'?
+	# 此包或其构建是否依赖于 'postgresql'？
 	if [[ "$TERMUX_PKG_DEPENDS" != "${TERMUX_PKG_DEPENDS/postgresql/}" ||
 		"$TERMUX_PKG_BUILD_DEPENDS" != "${TERMUX_PKG_BUILD_DEPENDS/postgresql/}" ]]; then
 		local postgresql_version
@@ -42,17 +41,17 @@ termux_step_override_config_scripts() {
 		chmod 755 "$TERMUX_PREFIX/bin/pg_config"
 	fi
 
-	# Does this package or its build depend on 'aosp-libs' or 'aosp-utils'?
-	# if so, complete the symbolic link chain from /system to $TERMUX_PREFIX/opt/aosp,
-	# otherwise break the symbolic link /system, to prevent the i686 and x86_64 builds of packages
-	# that use purely traditional Autotools cross-compilation, like guile, from having
+	# 此包或其构建是否依赖于 'aosp-libs' 或 'aosp-utils'？
+	# 如果是这样，则完成从 /system 到 $TERMUX_PREFIX/opt/aosp 的符号链接链，
+	# 否则中断符号链接 /system，以防止使用纯传统 Autotools 交叉编译的包
+	#（如 guile）的 i686 和 x86_64 构建出现
 	# "checking whether we are cross compiling... no"
-	# followed by
+	# 后跟
 	# "configure: error: No iconv support.  Please recompile libunistring with iconv enabled."
-	# if the Autotools cross-compilation temporary conftest binary manages to run
-	# in Ubuntu due to the presence of /system/lib(64)/libc.so and /system/bin/linker(64)
-	# that are intended only for use with packages that have a build dependency on 'aosp-libs'.
-	# See scripts/setup-ubuntu.sh and scripts/build/setup/termux_setup_proot.sh for more information.
+	# 如果 Autotools 交叉编译临时 conftest 二进制文件由于存在
+	# /system/lib(64)/libc.so 和 /system/bin/linker(64) 而设法在 Ubuntu 中运行，
+	# 而这些文件仅用于具有 'aosp-libs' 构建依赖项的包。
+	# 有关更多信息，请参见 scripts/setup-ubuntu.sh 和 scripts/build/setup/termux_setup_proot.sh。
 	rm -f "$TERMUX_APP__DATA_DIR/aosp"
 	case "$TERMUX_PKG_DEPENDS $TERMUX_PKG_BUILD_DEPENDS" in
 		*aosp-libs*|*aosp-utils*)

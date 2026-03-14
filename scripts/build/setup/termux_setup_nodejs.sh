@@ -1,10 +1,10 @@
 termux_setup_nodejs() {
 	export NODE_OPTIONS=""
-	# This should not be needed when we update nodejs version to v26
-	# This is the default from v25.2.0 onwards, and first LTS having it will be v26
-	# Ref: https://github.com/nodejs/node/commit/506b79e888
+	# 当我们将 nodejs 版本更新到 v26 时，这应该不再需要
+	# 这是 v25.2.0 之后的默认值，第一个包含它的 LTS 版本将是 v26
+	# 参考：https://github.com/nodejs/node/commit/506b79e888
 	NODE_OPTIONS+=" --network-family-autoselection-attempt-timeout=500"
-	# Use LTS version for now
+	# 目前使用 LTS 版本
 	local NODEJS_VERSION=22.22.1
 	local NODEJS_FOLDER
 
@@ -30,14 +30,14 @@ termux_setup_nodejs() {
 		    [ "$(cat "$TERMUX_BUILT_PACKAGES_DIRECTORY/nodejs")" != "$NODEJS_PKG_VERSION" ]) &&
 		   ([[ "$TERMUX_APP_PACKAGE_MANAGER" = "apt" && "$(dpkg-query -W -f '${db:Status-Status}\n' nodejs 2>/dev/null)" != "installed" ]] ||
 		    [[ "$TERMUX_APP_PACKAGE_MANAGER" = "pacman" && ! "$(pacman -Q nodejs 2>/dev/null)" ]]); then
-			echo "Package 'nodejs' is not installed."
-			echo "You can install it with"
+			echo "未安装 'nodejs' 软件包。"
+			echo "您可以通过以下方式安装："
 			echo
 			echo "  pkg install nodejs"
 			echo
 			echo "  pacman -S nodejs"
 			echo
-			echo "or build it from source with"
+			echo "或从源代码构建："
 			echo
 			echo "  ./build-package.sh nodejs"
 			echo

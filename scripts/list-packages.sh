@@ -1,5 +1,5 @@
 #!/bin/bash
-# list-packages.sh - tool to list all package with home pages and descriptions
+# list-packages.sh - 列出所有包及其主页和描述的工具
 
 show_package() {
 	. $1/build.sh

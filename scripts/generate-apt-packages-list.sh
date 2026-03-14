@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# This script generates a list of packages with their versions and other details to make it easier for parsing by check-repository-consistency.js
-# Outputs scripts/apt-packages-list-<arch>.txt for each architecture
+# 此脚本生成包列表及其版本和其他详细信息，以便 check-repository-consistency.js 更容易解析
+# 为每个架构输出 scripts/apt-packages-list-<arch>.txt
 #
-# Format of each line:
+# 每行的格式：
 # <package_name> <repo-name> <version> <may_have_staticsplit>
 #
-# Usage:
+# 用法：
 # ./scripts/generate-apt-packages-list.sh "/path/to/output_dir"
 #
-# The script will generate "/path/to/output_dir/apt-packages-list-<arch>.txt"
-# for aarch64, arm, i686 and x86_64
+# 脚本将为 aarch64、arm、i686 和 x86_64
+# 生成 "/path/to/output_dir/apt-packages-list-<arch>.txt"
 
 if [[ "$#" != 1 ]]; then
-	echo 'Usage:'
+	echo '用法：'
 	echo './scripts/generate-apt-packages-list.sh "/path/to/output_dir"'
 	exit 1
 fi
@@ -26,7 +26,7 @@ OUTPUT_DIR="$1"
 readarray -t repo_paths <<< "$(jq --raw-output 'del(.pkg_format) | keys | .[]' "$TERMUX_PACKAGES_DIR/repo.json")"
 
 for arch in "aarch64" "arm" "i686" "x86_64"; do
-	# Note that this is loop for generating the list of packages is being parallelized for each architecture
+	# 注意，此生成包列表的循环正在为每个架构并行化
 	for repo_path in "${repo_paths[@]}"; do
 		repo_name="$(jq --raw-output ".\"$repo_path\".name" "$TERMUX_PACKAGES_DIR/repo.json")"
 		for pkg_path in "$TERMUX_PACKAGES_DIR/$repo_path"/*; do
@@ -37,9 +37,9 @@ for arch in "aarch64" "arm" "i686" "x86_64"; do
 				set +euo pipefail
 				. "$pkg_path/build.sh" &> /dev/null || :
 				set -euo pipefail
-				# We are erroneously adding a revision for packages with version containing a dash when generating the apt packages in our build scripts.
-				# So reproduce the same bug here
-				# Source: scripts/build/termux_extract_dep_info.sh
+				# 我们在构建脚本中生成 apt 包时，错误地为版本包含短横线的包添加了修订版。
+				# 所以在这里重现相同的错误
+				# 来源：scripts/build/termux_extract_dep_info.sh
 				#	if [[ "$TERMUX_PKG_REVISION" != "0" || "$TERMUX_PKG_VERSION" != "${TERMUX_PKG_VERSION/-/}" ]]; then
 				#		VER_DEBIAN+="-$TERMUX_PKG_REVISION"
 				# fi
@@ -91,7 +91,7 @@ for arch in "aarch64" "arm" "i686" "x86_64"; do
 				done
 			)
 		done
-	done > "$OUTPUT_DIR/apt-packages-list-$arch.txt" & # Parallelize each architecture
+	done > "$OUTPUT_DIR/apt-packages-list-$arch.txt" & # 并行化每个架构
 done
 
 wait

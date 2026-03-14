@@ -2,7 +2,7 @@
 
 set -e -u
 
-# This script is in '$TERMUX_SCRIPTDIR/scripts/bin/'.
+# 此脚本位于 '$TERMUX_SCRIPTDIR/scripts/bin/'。
 TERMUX_SCRIPTDIR=$(cd "$(realpath "$(dirname "$0")")"; cd ../..; pwd)
 DRY_RUN_SCRIPT_NAME=$(basename "$0")
 BUILDSCRIPT_NAME="build-package.sh"
@@ -14,19 +14,19 @@ root-packages
 x11-packages
 "
 
-# Please keep synchronized with the logic of lines 468-547 of 'build-package.sh'.
+# 请与 'build-package.sh' 的第 468-547 行的逻辑保持同步。
 declare -a PACKAGE_LIST=()
 while (($# >= 1)); do
 	case "$1" in
 		*"/$BUILDSCRIPT_NAME") ;;
 		-a)
 			if [ $# -lt 2 ]; then
-				echo "$DRY_RUN_SCRIPT_NAME: Option '-a' requires an argument"
+				echo "$DRY_RUN_SCRIPT_NAME: 选项 '-a' 需要一个参数"
 				exit 1
 			fi
 			shift 1
 			if [ -z "$1" ]; then
-				echo "$DRY_RUN_SCRIPT_NAME: Argument to '-a' should not be empty."
+				echo "$DRY_RUN_SCRIPT_NAME: '-a' 的参数不应为空。"
 				exit 1
 			fi
 			TERMUX_ARCH="$1"
@@ -38,7 +38,7 @@ while (($# >= 1)); do
 	shift 1
 done
 
-# Please keep synchronized with the logic of lines 592-656 of 'build-package.sh'.
+# 请与 'build-package.sh' 的第 592-656 行的逻辑保持同步。
 for ((i=0; i<${#PACKAGE_LIST[@]}; i++)); do
 	TERMUX_PKG_NAME=$(basename "${PACKAGE_LIST[i]}")
 	TERMUX_PKG_BUILDER_DIR=
@@ -49,39 +49,37 @@ for ((i=0; i<${#PACKAGE_LIST[@]}; i++)); do
 		fi
 	done
 	if [ -z "${TERMUX_PKG_BUILDER_DIR}" ]; then
-		echo "$DRY_RUN_SCRIPT_NAME: No package $TERMUX_PKG_NAME found in any of the enabled repositories. Are you trying to set up a custom repository?"
+		echo "$DRY_RUN_SCRIPT_NAME: 在任何启用的仓库中未找到包 $TERMUX_PKG_NAME。您是否正在尝试设置自定义仓库？"
 		exit 1
 	fi
 	TERMUX_PKG_BUILDER_SCRIPT="$TERMUX_PKG_BUILDER_DIR/build.sh"
 
-	# Please keep synchronized with the logic of lines 2-50 of 'scripts/build/termux_step_start_build.sh'.
+	# 请与 'scripts/build/termux_step_start_build.sh' 的第 2-50 行的逻辑保持同步。
 	if [ "${TERMUX_ARCH}" != "all" ] && \
 		grep -qE "^TERMUX_PKG_EXCLUDED_ARCHES=.*${TERMUX_ARCH}" "$TERMUX_PKG_BUILDER_SCRIPT"; then
-		echo "$DRY_RUN_SCRIPT_NAME: Skipping building $TERMUX_PKG_NAME for arch $TERMUX_ARCH"
+		echo "$DRY_RUN_SCRIPT_NAME: 跳过为架构 $TERMUX_ARCH 构建 $TERMUX_PKG_NAME"
 		continue
 	fi
 
 	if [ "${TERMUX_DEBUG_BUILD}" = "true" ] && \
 		grep -qE "^TERMUX_PKG_HAS_DEBUG=.*false" "$TERMUX_PKG_BUILDER_SCRIPT"; then
-		echo "$DRY_RUN_SCRIPT_NAME: Skipping building debug build for $TERMUX_PKG_NAME"
+		echo "$DRY_RUN_SCRIPT_NAME: 跳过为 $TERMUX_PKG_NAME 构建调试版本"
 		continue
 	fi
 
-	echo "$DRY_RUN_SCRIPT_NAME: Ending dry run simulation ($BUILDSCRIPT_NAME would have continued building $TERMUX_PKG_NAME)"
+	echo "$DRY_RUN_SCRIPT_NAME: 结束 dry run 模拟（$BUILDSCRIPT_NAME 本应继续构建 $TERMUX_PKG_NAME）"
 	exit 0
 done
 
 if [ ${#PACKAGE_LIST[@]} -gt 0 ]; then
-	# At least one package name was parsed, but none of them reached "exit 0",
-	# so exit with return value 85 (EX_C__NOOP) to indicate that no packages would have been built.
-	echo "$DRY_RUN_SCRIPT_NAME: Ending dry run simulation ($BUILDSCRIPT_NAME would not have built any packages)"
+	# 至少解析了一个包名称，但没有一个达到 "exit 0"，
+	# 所以以返回值 85 (EX_C__NOOP) 退出，以表示不会构建任何包。
+	echo "$DRY_RUN_SCRIPT_NAME: 结束 dry run 模拟（$BUILDSCRIPT_NAME 本应不会构建任何包）"
 	exit 85 # EX_C__NOOP
 fi
 
-# If this point is reached, assume that a combination of arguments
-# that is either invalid or is not implemented in this script
-# has been used, and that the real 'build-package.sh'
-# needs to be run so that its own parser can interpret the arguments
-# and display the appropriate message.
-echo "$DRY_RUN_SCRIPT_NAME: Ending dry run simulation (unknown arguments, pass to the real $BUILDSCRIPT_NAME for more information)"
+# 如果到达此点，则假设使用了无效或未在此脚本中实现的参数组合，
+# 并且需要运行真实的 'build-package.sh' 以便其自己的解析器可以解释参数
+# 并显示适当的消息。
+echo "$DRY_RUN_SCRIPT_NAME: 结束 dry run 模拟（未知参数，传递给真实的 $BUILDSCRIPT_NAME 以获取更多信息）"
 exit 0

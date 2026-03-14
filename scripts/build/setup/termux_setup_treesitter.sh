@@ -23,8 +23,8 @@ termux_setup_treesitter() {
 			;;
 		esac
 		if (( ${#TREE_SITTER_INSTALL_COMMAND} )); then
-			echo "Package 'tree-sitter' is not installed."
-			echo "You can install it with"
+			echo "未安装 'tree-sitter' 软件包。"
+			echo "您可以通过以下方式安装："
 			echo
 			echo "  pkg install tree-sitter"
 			echo
@@ -36,7 +36,7 @@ termux_setup_treesitter() {
 	fi
 
 	if [[ ! "$( "${TERMUX_TREE_SITTER_DIR}/bin/tree-sitter" --version | cut -f2 -d' ')" == "$TERMUX_TREE_SITTER_VERSION" ]]; then
-		echo "termux_step_setup_treesitter: installing tree-sitter $TERMUX_TREE_SITTER_VERSION"
+		echo "termux_step_setup_treesitter: 正在安装 tree-sitter $TERMUX_TREE_SITTER_VERSION"
 		termux_download "${TERMUX_TREE_SITTER_URL}" \
 			"${TERMUX_PKG_TMPDIR}/${TERMUX_TREE_SITTER_GZNAME}" \
 			"${TERMUX_TREE_SITTER_SHA256}"
@@ -45,7 +45,7 @@ termux_setup_treesitter() {
 		mv -v "$TERMUX_PKG_TMPDIR"/{tree-sitter-linux-x64,tree-sitter}
 		install -Dm700 "$TERMUX_PKG_TMPDIR/tree-sitter" "$TERMUX_TREE_SITTER_DIR/bin/tree-sitter"
 	else
-		echo "termux_step_setup_treesitter: tree-sitter $TERMUX_TREE_SITTER_VERSION is already installed"
+		echo "termux_step_setup_treesitter: tree-sitter $TERMUX_TREE_SITTER_VERSION 已经安装"
 		echo "$TERMUX_TREE_SITTER_DIR/bin/tree-sitter"
 	fi
 
@@ -55,9 +55,9 @@ termux_setup_treesitter() {
 	ln -sf "$TERMUX_SCRIPTDIR/packages/tree-sitter/termux-tree-sitter" "${TERMUX_TREE_SITTER_DIR}/bin"
 	export PATH="${TERMUX_TREE_SITTER_DIR}/bin:${PATH}"
 
-	# ABI version to build the parser against.
+	# 用于构建解析器的 ABI 版本。
 	export TREE_SITTER_ABI_VERSION
-	# Needed for pkgconfig files
+	# pkgconfig 文件需要
 	# shellcheck disable=SC2031
 	export TERMUX_PREFIX TERMUX_PKG_VERSION TERMUX_PKG_DESCRIPTION TERMUX_PKG_HOMEPAGE
 

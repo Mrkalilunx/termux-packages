@@ -8,7 +8,7 @@ termux_step_configure_autotools() {
 
 	local DISABLE_NLS="--disable-nls"
 	if [ "$TERMUX_PKG_EXTRA_CONFIGURE_ARGS" != "${TERMUX_PKG_EXTRA_CONFIGURE_ARGS/--enable-nls/}" ]; then
-		# Do not --disable-nls if package explicitly enables it (for gettext itself)
+		# 如果软件包明确启用了 nls，则不要禁用它（例如 gettext 本身）
 		DISABLE_NLS=""
 	fi
 
@@ -33,7 +33,7 @@ termux_step_configure_autotools() {
 	fi
 
 	if [ "$TERMUX_ON_DEVICE_BUILD" = "false" ] && [ ! -d "$TERMUX_PKG_TMPDIR/config-scripts" ]; then
-		# Some packages provides a $PKG-config script which some configure scripts pickup instead of pkg-config:
+		# 某些软件包提供 $PKG-config 脚本，某些 configure 脚本会使用它而不是 pkg-config：
 		mkdir "$TERMUX_PKG_TMPDIR/config-scripts"
 		for f in $TERMUX_PREFIX/bin/*config; do
 			if [[ -f "$f" && "$(head -c 4 "$f")" != "$(echo -ne '\0177ELF')" ]]; then
@@ -43,7 +43,7 @@ termux_step_configure_autotools() {
 		export PATH=$TERMUX_PKG_TMPDIR/config-scripts:$PATH
 	fi
 
-	# Avoid gnulib wrapping of functions when cross compiling. See
+	# 交叉编译时避免 gnulib 包装函数。参见
 	# http://wiki.osdev.org/Cross-Porting_Software#Gnulib
 	# https://gitlab.com/sortix/sortix/wikis/Gnulib
 	# https://github.com/termux/termux-packages/issues/76
@@ -99,7 +99,7 @@ termux_step_configure_autotools() {
 	AVOID_GNULIB+=" gl_cv_header_working_fcntl_h=yes"
 	AVOID_GNULIB+=" gl_cv_C_locale_sans_EILSEQ=yes"
 
-	# NOTE: We do not want to quote AVOID_GNULIB as we want word expansion.
+	# 注意：我们不希望对 AVOID_GNULIB 加引号，因为我们需要单词扩展。
 	# shellcheck disable=SC2086
 	env $AVOID_GNULIB "$TERMUX_PKG_SRCDIR/configure" \
 		--disable-dependency-tracking \

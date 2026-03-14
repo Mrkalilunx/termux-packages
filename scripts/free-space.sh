@@ -1,14 +1,14 @@
 #!/bin/sh
 
-# This script clears about ~36G of space.
+# 此脚本清理大约 36G 的空间。
 
-# Test:
-# echo "Listing 100 largest packages after"
+# 测试：
+# echo "之后列出 100 个最大的包"
 # dpkg-query -Wf '${Installed-Size}\t${Package}\n' | sort -n | tail -n 100
 # exit 0
 
 if [ "${CI-false}" != "true" ]; then
-	echo "ERROR: not running on CI, not deleting system files to free space!"
+	echo "错误：不在 CI 上运行，不删除系统文件以释放空间！"
 	exit 1
 else
 	# shellcheck disable=SC2046
@@ -37,7 +37,7 @@ else
 		# google-chrome-stable
 		# microsoft-edge-stable already removed by the deps in the above apt purge
 
-	# Directories
+	# 目录
 	sudo rm -rf /opt/ghc /opt/az /opt/hostedtoolcache /opt/actionarchivecache /opt/runner-cache
 	sudo rm -rf /opt/pipx /usr/share/dotnet /usr/share/swift /usr/share/miniconda /usr/share/az_* /usr/share/gradle-* /usr/share/java /home/runner/.rustup
 	sudo rm -rf /etc/skel /home/packer /home/linuxbrew
@@ -46,9 +46,9 @@ else
 	# https://github.com/actions/runner-images/issues/709#issuecomment-612569242
 	sudo rm -rf "$AGENT_TOOLSDIRECTORY"
 
-	# Clean compressed docker images
-	# Docker has already deflated them before free-space.sh was called in CI, so
-	# the compressed parts are just collecting junk on the disk
+	# 清理压缩的 docker 镜像
+	# Docker 已经在 CI 中调用 free-space.sh 之前解压了它们，所以
+	# 压缩部分只是在磁盘上收集垃圾
 	sudo rm -rf /var/lib/containerd/io.containerd.content.v1.content/
 
 	sudo apt autoremove -yq

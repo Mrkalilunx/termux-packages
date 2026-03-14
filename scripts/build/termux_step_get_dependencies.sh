@@ -1,9 +1,9 @@
 termux_step_get_dependencies() {
 	[[ "$TERMUX_SKIP_DEPCHECK" == "true" || "$TERMUX_PKG_METAPACKAGE" == "true" ]] && return 0
-	[[ "$TERMUX_INSTALL_DEPS" == "true" ]] && termux_download_repo_file # Download repo files
+	[[ "$TERMUX_INSTALL_DEPS" == "true" ]] && termux_download_repo_file # 下载仓库文件
 
 	while read -r PKG PKG_DIR; do
-		# Checking for duplicate dependencies
+		# 检查重复的依赖项
 		local cyclic_dependence="false"
 		if termux_check_package_in_building_packages_list "$PKG_DIR"; then
 			echo "A circular dependency was found on '$PKG', the old version of the package will be installed to resolve the conflict"
@@ -70,8 +70,8 @@ termux_step_get_dependencies() {
 			if [[ "$cyclic_dependence" == "false" && ( "$TERMUX_WITHOUT_DEPVERSION_BINDING" == "false" || "$TERMUX_ON_DEVICE_BUILD" == "false" ) ]]; then
 				echo "$DEP_VERSION" > "$TERMUX_BUILT_PACKAGES_DIRECTORY/$PKG"
 			fi
-		else # Build dependencies
-			# Built dependencies are put in the default TERMUX_OUTPUT_DIR instead of the specified one
+		else # 构建依赖项
+			# 构建的依赖项被放置在默认的 TERMUX_OUTPUT_DIR 中，而不是指定的
 			if [[ "$TERMUX_FORCE_BUILD_DEPENDENCIES" == "true" ]]; then
 				[[ "$TERMUX_QUIET_BUILD" != "true" ]] && echo "Force building dependency $PKG..."
 				read -r DEP_ARCH DEP_VERSION DEP_VERSION_PAC DEP_ON_DEVICE_NOT_SUPPORTED < <(termux_extract_dep_info $PKG "${PKG_DIR}")
@@ -115,7 +115,7 @@ termux_run_build-package() {
 termux_download_repo_file() {
 	termux_get_repo_files
 
-	# When doing build on device, ensure that apt lists are up-to-date.
+	# 在设备上构建时，确保 apt 列表是最新的。
 	if [[ "$TERMUX_ON_DEVICE_BUILD" = "true" ]]; then
 		case "$TERMUX_APP_PACKAGE_MANAGER" in
 			"apt") apt update;;

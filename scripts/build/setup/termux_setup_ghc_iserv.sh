@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# This provides an utility function to setup iserv (external interpreter of ghc) to cross-compile haskell-template.
+# 此函数提供实用工具来设置 iserv（ghc 的外部解释器）以交叉编译 haskell-template。
 termux_setup_ghc_iserv() {
 	local TERMUX_ISERV_BIN="$TERMUX_COMMON_CACHEDIR/iserv-bin-$TERMUX_ARCH"
 	local TERMUX_ISERV_BIN_NAME="termux-ghc-iserv"

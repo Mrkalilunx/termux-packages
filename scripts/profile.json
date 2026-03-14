@@ -1,5 +1,5 @@
 {
-    "description": "This is a custom seccomp profile which allows the personality, mount and umount2 system calls, based on https://github.com/moby/moby/blob/e258d66f176a4447931edfd9398c55b3e8ee4a07/profiles/seccomp/default.json.",
+    "description": "这是一个自定义的 seccomp 配置文件，允许 personality、mount 和 umount2 系统调用，基于 https://github.com/moby/moby/blob/e258d66f176a4447931edfd9398c55b3e8ee4a07/profiles/seccomp/default.json.",
     "defaultAction": "SCMP_ACT_ERRNO",
     "defaultErrnoRet": 1,
     "archMap": [

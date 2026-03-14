@@ -3,7 +3,7 @@ termux_step_elf_cleaner() {
 }
 
 termux_step_elf_cleaner__from_paths() {
-	# Remove entries unsupported by Android's linker:
+	# 删除 Android 链接器不支持的条目：
 	find "$@" -type f -print0 | xargs -r -0 \
 		"$TERMUX_ELF_CLEANER" --api-level "$TERMUX_PKG_API_LEVEL"
 }

@@ -15,8 +15,8 @@ termux_step_setup_cgct_environment() {
 	fi
 }
 
-# The temporary glibc is a glibc used only during compilation of simple packages
-# or a full glibc that will be customized for the system and replace the temporary glibc.
+# 临时 glibc 是仅在编译简单包期间使用的 glibc，
+# 或将定制系统并替换临时 glibc 的完整 glibc。
 termux_install_temporary_glibc() {
 	local PKG="glibc"
 	local multilib_glibc=false
@@ -25,7 +25,7 @@ termux_install_temporary_glibc() {
 		PKG+="32"
 	fi
 
-	# Checking if temporary glibc needs to be installed.
+	# 检查是否需要安装临时 glibc。
 	if [ -f "$TERMUX_BUILT_PACKAGES_DIRECTORY/$PKG-temporary-for-cgct" ]; then
 		return
 	fi
@@ -50,7 +50,7 @@ termux_install_temporary_glibc() {
 		"$GPKG_JSON" \
 		SKIP_CHECKSUM
 
-	# Installing temporary glibc.
+	# 安装临时 glibc。
 	local GLIBC_PKG=$(jq -r '."glibc"."FILENAME"' "$GPKG_JSON")
 	if [ ! -f "$PATH_TMP_GLIBC/$GLIBC_PKG" ]; then
 		termux_download "$GPKG_LINK/$GLIBC_PKG" \
@@ -60,13 +60,13 @@ termux_install_temporary_glibc() {
 
 	[ ! "$TERMUX_QUIET_BUILD" = true ] && echo "extracting temporary $PKG..."
 
-	# Unpacking temporary glibc.
+	# 解包临时 glibc。
 	tar -xJf "$PATH_TMP_GLIBC/$GLIBC_PKG" -C "$PATH_TMP_GLIBC" data
 	if [ "$multilib_glibc" = "true" ]; then
-		# Installing `lib32`.
+		# 安装 `lib32`。
 		mkdir -p "$TERMUX__PREFIX__LIB_DIR"
 		cp -r "$PATH_TMP_GLIBC/$PREFIX_TMP_GLIBC/lib/"* "$TERMUX__PREFIX__LIB_DIR"
-		# Installing `include32`.
+		# 安装 `include32`。
 		mkdir -p "$TERMUX__PREFIX__INCLUDE_DIR"
 		local hpath
 		for hpath in $(find "$PATH_TMP_GLIBC/$PREFIX_TMP_GLIBC/include" -type f); do
@@ -78,26 +78,26 @@ termux_install_temporary_glibc() {
 		done
 		find "$PATH_TMP_GLIBC/$PREFIX_TMP_GLIBC/include" -type d -empty -delete
 		cp -r "$PATH_TMP_GLIBC/$PREFIX_TMP_GLIBC/include/"* "$TERMUX__PREFIX__INCLUDE_DIR"
-		# Installing dynamic linker in lib.
+		# 在 lib 中安装动态链接器。
 		mkdir -p "$TERMUX__PREFIX__BASE_LIB_DIR"
 		local ld_path=$(ls "$TERMUX__PREFIX__LIB_DIR"/ld-*)
 		ln -sr "${ld_path}" "$TERMUX__PREFIX__BASE_LIB_DIR/$(basename ${ld_path})"
 	else
-		# Complete installation of glibc components.
+		# 完成 glibc 组件的安装。
 		cp -r "$PATH_TMP_GLIBC/$PREFIX_TMP_GLIBC/"* "$TERMUX_PREFIX"
 	fi
-	# It is necessary to reconfigure the paths in libs for correct
-	# work of multilib-compilation and compilation in forked projects.
+	# 有必要重新配置 libs 中的路径，以便 multilib-编译
+	# 和分支项目中的编译正常工作。
 	grep -I -s -r -l "/$PREFIX_TMP_GLIBC/lib/" "$TERMUX__PREFIX__LIB_DIR" | xargs sed -i "s|/$PREFIX_TMP_GLIBC/lib/|$TERMUX__PREFIX__LIB_DIR/|g"
 
-	# Marking the installation of temporary glibc.
+	# 标记临时 glibc 的安装。
 	rm -fr "$PATH_TMP_GLIBC/data"
 	mkdir -p "$TERMUX_BUILT_PACKAGES_DIRECTORY"
 	touch "$TERMUX_BUILT_PACKAGES_DIRECTORY/$PKG-temporary-for-cgct"
 }
 
-# Sets up symbolic links to libgcc* libraries (from cgct) in the application environment
-# to allow cgct to work properly, if necessary.
+# 在应用程序环境中设置指向 libgcc* 库（来自 cgct）的符号链接，
+# 以允许 cgct 正常工作（如有必要）。
 termux_set_links_to_libgcc_of_cgct() {
 	local libgcc_cgct
 	mkdir -p "$TERMUX__PREFIX__LIB_DIR"

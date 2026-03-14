@@ -9,22 +9,22 @@ profile _custom-termux-package-builder-{{CONTAINER_NAME}} flags=(attach_disconne
   capability,
   file,
   umount,
-  # Host (privileged) processes may send signals to container processes.
+  # 主机（特权）进程可以向容器进程发送信号。
   signal (receive) peer=unconfined,
-  # runc may send signals to container processes.
+  # runc 可以向容器进程发送信号。
   signal (receive) peer=runc,
-  # crun may send signals to container processes.
+  # crun 可以向容器进程发送信号。
   signal (receive) peer=crun,
-  # Manager may send signals to container processes.
+  # 管理器可以向容器进程发送信号。
   signal (receive) peer=unconfined,
-  # Container processes may send signals amongst themselves.
+  # 容器进程之间可以相互发送信号。
   signal (send,receive) peer=_custom-termux-package-builder-{{CONTAINER_NAME}},
 
-  deny @{PROC}/* w,   # deny write for all files directly in /proc (not in a subdir)
-  # deny write to files not in /proc/<number>/** or /proc/sys/**
+  deny @{PROC}/* w,   # 拒绝直接在 /proc 中的所有文件的写入（不在子目录中）
+  # 拒绝对不在 /proc/<number>/** 或 /proc/sys/** 中的文件的写入
   deny @{PROC}/{[^1-9],[^1-9][^0-9],[^1-9s][^0-9y][^0-9s],[^1-9][^0-9][^0-9][^0-9]*}/** w,
-  deny @{PROC}/sys/[^k]** w,  # deny /proc/sys except /proc/sys/k* (effectively /proc/sys/kernel)
-  deny @{PROC}/sys/kernel/{?,??,[^s][^h][^m]**} w,  # deny everything except shm* in /proc/sys/kernel/
+  deny @{PROC}/sys/[^k]** w,  # 拒绝 /proc/sys 除了 /proc/sys/k*（实际上 /proc/sys/kernel）
+  deny @{PROC}/sys/kernel/{?,??,[^s][^h][^m]**} w,  # 拒绝 /proc/sys/kernel/ 中除了 shm* 之外的所有内容
   deny @{PROC}/sysrq-trigger rwklx,
   deny @{PROC}/mem rwklx,
   deny @{PROC}/kmem rwklx,
@@ -39,25 +39,24 @@ profile _custom-termux-package-builder-{{CONTAINER_NAME}} flags=(attach_disconne
   deny /sys/devices/virtual/powercap/** rwklx,
   deny /sys/kernel/security/** rwklx,
 
-  # allow processes within the container to trace each other,
-  # provided all other LSM and yama setting allow it.
+  # 允许容器内的进程相互追踪，
+  # 前提是所有其他 LSM 和 yama 设置允许这样做。
   ptrace (trace,tracedby,read,readby) peer=_custom-termux-package-builder-{{CONTAINER_NAME}},
 
-  # Allow mounting fuse overlayfs filesystems in ~/.termux-build/
-	# This is used for mounting overlayfs of our build toolchain. This is
-	# more efficient than copying over the entire NDK as this takes up
-	# just under 50MB storage than 2.4GB
+  # 允许在 ~/.termux-build/ 中挂载 fuse overlayfs 文件系统
+	# 这用于挂载我们构建工具链的 overlayfs。这比复制整个 NDK 更高效，
+	# 因为这占用不到 50MB 的存储空间，而不是 2.4GB
 	mount fstype=fuse.fuse-overlayfs -> /home/builder/.termux-build/**,
 
-  # Deal with privilege escalation
+  # 处理特权升级
 	deny capability setuid,
 	deny capability setgid,
 
-	# Do not allow the container to modify trusted scripts
+	# 不允许容器修改受信任的脚本
 	deny /home/builder/termux-packages/[^o]** wlk,
-	# Explicitly allow storing built debs
+	# 显式允许存储构建的 deb 包
 	allow /home/builder/termux-packages/output/** rw,
 
-  # Do not allow the container to modify the build toolchain
+  # 不允许容器修改构建工具链
 	deny /home/builder/lib/** wlk,
 }

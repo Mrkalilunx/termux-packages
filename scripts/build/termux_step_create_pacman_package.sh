@@ -1,16 +1,16 @@
 termux_step_create_pacman_package() {
 	if [ "$TERMUX_PKG_METAPACKAGE" = "true" ]; then
-		# Metapackage doesn't have data inside.
+		# 元包内部没有数据。
 		rm -rf data
 	fi
 
 	local TERMUX_PKG_INSTALLSIZE
 	TERMUX_PKG_INSTALLSIZE=$(du -bs . | cut -f 1)
 
-	# From here on TERMUX_ARCH is set to "all" if TERMUX_PKG_PLATFORM_INDEPENDENT is set by the package
+	# 从现在开始，如果包设置了 TERMUX_PKG_PLATFORM_INDEPENDENT，则 TERMUX_ARCH 被设置为 "all"
 	[ "$TERMUX_PKG_PLATFORM_INDEPENDENT" = "true" ] && TERMUX_ARCH=any
 
-	# Configuring the selection of a copress for a batch.
+	# 配置批处理的压缩选择。
 	local COMPRESS
 	local PKG_FORMAT
 	case $TERMUX_PACMAN_PACKAGE_COMPRESSION in
@@ -52,7 +52,7 @@ termux_step_create_pacman_package() {
 		test ! -z "$TERMUX_PKG_SUGGESTS" && TERMUX_PKG_SUGGESTS=$(termux_package__add_prefix_glibc_to_package_list "$TERMUX_PKG_SUGGESTS")
 	fi
 
-	# Package metadata.
+	# 包元数据。
 	{
 		echo "pkgname = $TERMUX_PKG_NAME"
 		echo "pkgbase = $TERMUX_PKG_NAME"
@@ -109,7 +109,7 @@ termux_step_create_pacman_package() {
 		fi
 	} > .PKGINFO
 
-	# Build metadata.
+	# 构建元数据。
 	{
 		echo "format = 2"
 		echo "pkgname = $TERMUX_PKG_NAME"
@@ -120,7 +120,7 @@ termux_step_create_pacman_package() {
 		echo "builddate = $SOURCE_DATE_EPOCH"
 	} > .BUILDINFO
 
-	# Write installation hooks.
+	# 写入安装钩子。
 	termux_step_create_debscripts
 	# Process `update-alternatives` entries from `.alternatives` files
 	# These need to be merged into the `.postinst` and `.prerm` files, so after those are created.
@@ -128,10 +128,10 @@ termux_step_create_pacman_package() {
 	termux_step_create_python_debscripts
 	termux_step_create_pacman_install_hook
 
-	# ensure all elements of the package have the same mtime
+	# 确保包的所有元素具有相同的 mtime
 	find . -exec touch -h -d @$SOURCE_DATE_EPOCH {} +
 
-	# Create package
+	# 创建包
 	shopt -s dotglob globstar
 	printf '%s\0' **/* | bsdtar -cnf - --format=mtree \
 		--options='!all,use-set,type,uid,gid,mode,time,size,md5,sha256,link' \

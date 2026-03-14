@@ -1,6 +1,6 @@
 termux_extract_src_archive() {
-	# STRIP=1 extracts archives straight into TERMUX_PKG_SRCDIR while STRIP=0 puts them in subfolders. zip has same behaviour per default
-	# If this isn't desired then this can be fixed in termux_step_post_get_source.
+	# STRIP=1 将归档文件直接解压到 TERMUX_PKG_SRCDIR，而 STRIP=0 将它们放入子文件夹。zip 默认具有相同的行为
+	# 如果这不是期望的行为，可以在 termux_step_post_get_source 中修复。
 	local STRIP=1
 	local PKG_SRCURL=(${TERMUX_PKG_SRCURL[@]})
 	for i in $(seq 0 $(( ${#PKG_SRCURL[@]}-1 ))); do

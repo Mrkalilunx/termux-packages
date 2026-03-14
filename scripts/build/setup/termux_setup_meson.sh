@@ -21,7 +21,7 @@ termux_setup_meson() {
 		shopt -s nullglob
 		local f
 		for f in "$TERMUX_SCRIPTDIR"/scripts/build/setup/meson-*.patch; do
-			echo "[${FUNCNAME[0]}]: Applying $(basename "$f")"
+			echo "[${FUNCNAME[0]}]: 正在应用 $(basename "$f")"
 			patch --silent -p1 -d "$MESON_TMP_FOLDER" < "$f"
 		done
 		shopt -u nullglob

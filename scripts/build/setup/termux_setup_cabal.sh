@@ -27,7 +27,7 @@ termux_setup_cabal() {
 
 		cabal update
 
-		# Configuration:
+		# 配置：
 
 		local repo="hackage.haskell.org"
 
@@ -52,7 +52,7 @@ termux_setup_cabal() {
 	else
 		if [[ "${TERMUX_APP_PACKAGE_MANAGER}" == "apt" ]] && "$(dpkg-query -W -f '${db:Status-Status}\n' cabal-install 2>/dev/null)" != "installed" ||
 			[[ "${TERMUX_APP_PACKAGE_MANAGER}" == "pacman" ]] && ! "$(pacman -Q cabal-install 2>/dev/null)"; then
-			echo "Package 'cabal-install' is not installed."
+			echo "未安装 'cabal-install' 软件包。"
 			exit 1
 		fi
 	fi

@@ -21,8 +21,8 @@ termux_setup_cmake() {
 	if [ "${TERMUX_ON_DEVICE_BUILD}" = "true" ]; then
 		if [[ "$TERMUX_APP_PACKAGE_MANAGER" = "apt" && "$(dpkg-query -W -f '${db:Status-Status}\n' $TERMUX_CMAKE_NAME 2>/dev/null)" != "installed" ]] ||
 			[[ "$TERMUX_APP_PACKAGE_MANAGER" = "pacman" && ! "$(pacman -Q $TERMUX_CMAKE_NAME 2>/dev/null)" ]]; then
-			echo "Package '$TERMUX_CMAKE_NAME' is not installed."
-			echo "You can install it with"
+			echo "未安装 '$TERMUX_CMAKE_NAME' 软件包。"
+			echo "您可以通过以下方式安装："
 			echo
 			echo "  pkg install $TERMUX_CMAKE_NAME"
 			echo

@@ -1,8 +1,8 @@
 termux_step_configure() {
 	[ "$TERMUX_PKG_METAPACKAGE" = "true" ] && return
 
-	# This check should be above autotools check as haskell package too makes use of configure scripts which
-	# should be executed by its own build system.
+	# 此检查应该在 autotools 检查之上，因为 haskell 软件包也使用 configure 脚本，
+	# 这些脚本应该由其自己的构建系统执行。
 	if ls "${TERMUX_PKG_SRCDIR}"/*.cabal &>/dev/null || ls "${TERMUX_PKG_SRCDIR}"/cabal.project &>/dev/null; then
 		[ "$TERMUX_CONTINUE_BUILD" == "true" ] && return
 		termux_step_configure_cabal
@@ -17,10 +17,9 @@ termux_step_configure() {
 			termux_setup_ninja
 		fi
 
-		# Some packages, for example swift, uses cmake
-		# internally, but cannot be configured with our
-		# termux_step_configure_cmake function (CMakeLists.txt
-		# is not in src dir)
+		# 某些软件包（例如 swift）在内部使用 cmake，
+		# 但无法通过我们的 termux_step_configure_cmake 函数进行配置
+		#（CMakeLists.txt 不在 src 目录中）
 		if [ -f "$TERMUX_PKG_SRCDIR/CMakeLists.txt" ] &&
 			[ "$TERMUX_CONTINUE_BUILD" == "false" ]; then
 			termux_step_configure_cmake

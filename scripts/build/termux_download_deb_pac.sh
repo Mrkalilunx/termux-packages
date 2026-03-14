@@ -14,11 +14,9 @@ termux_download_deb_pac() {
 	fi
 	PKG_HASH=""
 
-	# Dependencies should be used from repo only if they are built for
-	# same package name.
-	# The data.tar.xz extraction by termux_step_get_dependencies would
-	# extract files to different prefix than TERMUX_PREFIX and builds
-	# would fail when looking for -I$TERMUX_PREFIX/include files.
+	# 依赖项应该仅当为相同的包名构建时才从仓库使用。
+	# termux_step_get_dependencies 对 data.tar.xz 的提取会将文件提取到
+	# 与 TERMUX_PREFIX 不同的前缀，并且构建在查找 -I$TERMUX_PREFIX/include 文件时会失败。
 	if [ "$TERMUX_REPO_APP__PACKAGE_NAME" != "$TERMUX_APP_PACKAGE" ]; then
 		echo "Ignoring download of $PKG_FILE since repo package name ($TERMUX_REPO_APP__PACKAGE_NAME) does not equal app package name ($TERMUX_APP_PACKAGE)"
 		return 1
@@ -65,11 +63,9 @@ termux_download_deb_pac() {
 			done
 		elif [ ! -f "${TERMUX_COMMON_CACHEDIR}-${PACKAGE_ARCH}/${PACKAGE_FILE_PATH}" ] && \
 			[ -f "${TERMUX_COMMON_CACHEDIR}-aarch64/${PACKAGE_FILE_PATH}" ]; then
-			# Packages file for $PACKAGE_ARCH did not
-			# exist. Could be an aptly mirror where the
-			# all arch is mixed into the other arches,
-			# check for package in aarch64 Packages
-			# instead.
+			# $PACKAGE_ARCH 的 Packages 文件不存在。
+			# 可能是一个 aptly 镜像，其中 all 架构被混合到其他架构中，
+			# 改为在 aarch64 Packages 中检查包。
 			if [ "$TERMUX_REPO_PKG_FORMAT" = "debian" ]; then
 				read -rd "\n" PKG_PATH PKG_HASH < <(./scripts/get_hash_from_file.py "${TERMUX_COMMON_CACHEDIR}-aarch64/$PACKAGE_FILE_PATH" "$PACKAGE" "$VERSION")
 			elif [ "$TERMUX_REPO_PKG_FORMAT" = "pacman" ]; then

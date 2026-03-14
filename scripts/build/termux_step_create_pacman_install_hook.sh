@@ -1,6 +1,6 @@
 termux_step_create_pacman_install_hook() {
-	# Unlike dpkg, pacman doesn't use separate scripts for package installation
-	# hooks. Instead it uses a single script with functions.
+	# 与 dpkg 不同，pacman 不对包安装钩子使用单独的脚本。
+	# 相反，它使用带有函数的单个脚本。
 	if [ -f "./preinst" ]; then
 		echo "pre_install() {" >> .INSTALL
 		cat preinst | grep -v '^#' >> .INSTALL
@@ -38,7 +38,7 @@ termux_step_create_pacman_install_hook() {
 		rm -f postrm
 	fi
 
-	# Conversion from dpkg triggers to libalpm hooks is not supported
-	# currently. Delete unneeded triggers file.
+	# 目前不支持从 dpkg 触发器到 libalpm 钩子的转换。
+	# 删除不需要的触发器文件。
 	rm -f triggers
 }

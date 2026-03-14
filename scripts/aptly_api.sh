@@ -1,6 +1,5 @@
-# These options and functions are sourced from
-# .github/workflows/packages.yml and used for uploading packages to
-# our repos
+# 这些选项和函数来自
+# .github/workflows/packages.yml，用于将包上传到我们的仓库
 
 CURL_COMMON_OPTIONS=(
   --silent
@@ -13,38 +12,37 @@ CURL_COMMON_OPTIONS=(
 
 CURL_ADDITIONAL_OPTIONS=()
 
-# Warn and dont push instead of error out if no auth provided
+# 如果没有提供认证，发出警告而不是退出
 check_login() {
   export APTLY_API_AUTH_WARN=${APTLY_API_AUTH_WARN:=0}
   local e=0
   if [[ -z "${APTLY_API_AUTH}" ]]; then
     e=1
     if [[ "$((APTLY_API_AUTH_WARN & 1))" == 0 ]]; then
-      echo "[$(date +%H:%M:%S)] Warning: No APTLY_API_AUTH provided"
+      echo "[$(date +%H:%M:%S)] 警告：未提供 APTLY_API_AUTH"
       APTLY_API_AUTH_WARN=$((APTLY_API_AUTH_WARN | 1))
     fi
   fi
   if [[ -z "${GPG_PASSPHRASE}" ]]; then
     e=1
     if [[ "$((APTLY_API_AUTH_WARN & 2))" == 0 ]]; then
-      echo "[$(date +%H:%M:%S)] Warning: No GPG_PASSPHRASE provided"
+      echo "[$(date +%H:%M:%S)] 警告：未提供 GPG_PASSPHRASE"
       APTLY_API_AUTH_WARN=$((APTLY_API_AUTH_WARN | 2))
     fi
   fi
   if [[ "${e}" != 0 ]]; then
     if [[ "$((APTLY_API_AUTH_WARN & 4))" == 0 ]]; then
-      echo "[$(date +%H:%M:%S)] Warning: You are most likely on a forked repo. Upload will be cancelled. Fix this if incorrect."
+      echo "[$(date +%H:%M:%S)] 警告：您很可能在分支仓库中。上传将被取消。如果此信息不正确，请修复。"
       APTLY_API_AUTH_WARN=$((APTLY_API_AUTH_WARN | 4))
     fi
     return 1
   fi
 }
 
-# Function for deleting temporary directory with uploaded files from
-# the server.
+# 用于从服务器删除包含上传文件的临时目录的函数。
 aptly_delete_dir() {
   ! check_login && return 0
-  echo "[$(date +%H:%M:%S)] Deleting uploads temporary directory..."
+  echo "[$(date +%H:%M:%S)] 正在删除上传的临时目录..."
 
   curl_response=$(
     curl \
@@ -56,7 +54,7 @@ aptly_delete_dir() {
   http_status_code=$(echo "$curl_response" | cut -d'|' -f2 | grep -oP '\d{3}$')
 
   if [ "$http_status_code" != "200" ]; then
-    echo "[$(date +%H:%M:%S)] Warning: server returned $http_status_code code while deleting temporary directory."
+    echo "[$(date +%H:%M:%S)] 警告：服务器在删除临时目录时返回了 $http_status_code 状态码。"
   fi
 }
 
@@ -72,17 +70,17 @@ aptly_upload_file() {
   http_status_code=$(echo "$curl_response" | cut -d'|' -f2 | grep -oP '\d{3}$')
 
   if [ "$http_status_code" = "200" ]; then
-    echo "[$(date +%H:%M:%S)] Uploaded: $(echo "$curl_response" | cut -d'|' -f1 | jq -r '.[]' | cut -d'/' -f2)"
+    echo "[$(date +%H:%M:%S)] 已上传：$(echo "$curl_response" | cut -d'|' -f1 | jq -r '.[]' | cut -d'/' -f2)"
   elif [ "$http_status_code" = "000" ]; then
-    echo "[$(date +%H:%M:%S)]: Failed to upload '$filename'. Server/proxy dropped connection during upload."
-    echo "[$(date +%H:%M:%S)]: Aborting any further uploads to this repo."
+    echo "[$(date +%H:%M:%S)]：上传 '$filename' 失败。服务器/代理在上传过程中断开连接。"
+    echo "[$(date +%H:%M:%S)]：中止对此仓库的任何进一步上传。"
     aptly_delete_dir
     return 1
   else
-    # Manually cleaning up the temporary directory to reclaim disk space.
-    # Don't rely on scheduled server-side scripts.
-    echo "[$(date +%H:%M:%S)] Error: failed to upload '$filename'. Server returned $http_status_code code."
-    echo "[$(date +%H:%M:%S)] Aborting any further uploads to this repo."
+    # 手动清理临时目录以释放磁盘空间。
+    # 不要依赖服务器端的定时脚本。
+    echo "[$(date +%H:%M:%S)] 错误：上传 '$filename' 失败。服务器返回了 $http_status_code 状态码。"
+    echo "[$(date +%H:%M:%S)] 中止对此仓库的任何进一步上传。"
     aptly_delete_dir
     return 1
   fi
@@ -91,7 +89,7 @@ aptly_upload_file() {
 
 aptly_add_to_repo() {
   ! check_login && return 0
-  echo "[$(date +%H:%M:%S)] Adding packages to repository '$REPOSITORY_NAME'..."
+  echo "[$(date +%H:%M:%S)] 正在将包添加到仓库 '$REPOSITORY_NAME'..."
   curl_response=$(
     curl \
       "${CURL_COMMON_OPTIONS[@]}" "${CURL_ADDITIONAL_OPTIONS[@]}" \
@@ -104,20 +102,20 @@ aptly_add_to_repo() {
   if [ "$http_status_code" = "200" ]; then
     warnings=$(echo "$curl_response" | cut -d'|' -f1 | jq '.Report.Warnings' | jq -r '.[]')
     if [ -n "$warnings" ]; then
-      echo "[$(date +%H:%M:%S)] APTLY WARNINGS (NON-CRITICAL):"
+      echo "[$(date +%H:%M:%S)] APTLY 警告（非致命）："
       echo
       echo "$warnings"
       echo
       return 1
     fi
   elif [ "$http_status_code" == "000" ]; then
-    echo "[$(date +%H:%M:%S)] Warning: server/proxy dropped connection. Assuming that the host is adding packages inspite of lost connection."
-    echo "[$(date +%H:%M:%S)] Warning: Waiting for host to add packages. Sleeping for 180s. Assuming that packages will be added till then."
+    echo "[$(date +%H:%M:%S)] 警告：服务器/代理断开连接。假设主机正在添加包，尽管连接已丢失。"
+    echo "[$(date +%H:%M:%S)] 警告：等待主机添加包。休眠 180 秒。假设包在此之前将被添加。"
     sleep 180
     return 0
   else
-    echo "[$(date +%H:%M:%S)] Error: got http_status_code == '$http_status_code'."
-    echo "[$(date +%H:%M:%S)] Error: the unexpected happened. Ask any maintainer to check the aptly log"
+    echo "[$(date +%H:%M:%S)] 错误：得到 http_status_code == '$http_status_code'。"
+    echo "[$(date +%H:%M:%S)] 错误：发生了意外情况。请任何维护者检查 aptly 日志"
     return 1
   fi
   return 0
@@ -125,7 +123,7 @@ aptly_add_to_repo() {
 
 aptly_publish_repo() {
   ! check_login && return 0
-  echo "[$(date +%H:%M:%S)] Publishing repository changes..."
+  echo "[$(date +%H:%M:%S)] 正在发布仓库更改..."
   curl_response=$(
     curl \
       "${CURL_COMMON_OPTIONS[@]}" "${CURL_ADDITIONAL_OPTIONS[@]}" \
@@ -138,18 +136,17 @@ aptly_publish_repo() {
   http_status_code=$(echo "$curl_response" | cut -d'|' -f2 | grep -oP '\d{3}$')
 
   if [ "$http_status_code" = "200" ]; then
-    echo "[$(date +%H:%M:%S)] Repository has been updated successfully."
+    echo "[$(date +%H:%M:%S)] 仓库已成功更新。"
   elif [ "$http_status_code" = "000" ]; then
-    echo "[$(date +%H:%M:%S)] Warning: server/proxy has dropped connection."
-    # Ignore - nothing can be done with that unless we change proxy.
+    echo "[$(date +%H:%M:%S)] 警告：服务器/代理已断开连接。"
+    # 忽略 - 除非更改代理，否则无法对此做任何处理。
     # return 1
   elif [ "$http_status_code" = "504" ]; then
-    echo "[$(date +%H:%M:%S)] Warning: request processing time was too long, connection dropped."
-    # Ignore - nothing can be done with that unless we change repository
-    # management tool or reduce repository size.
+    echo "[$(date +%H:%M:%S)] 警告：请求处理时间过长，连接断开。"
+    # 忽略 - 除非更改仓库管理工具或减小仓库大小，否则无法对此做任何处理。
     # return 1
   else
-    echo "[$(date +%H:%M:%S)] Error: got http_status_code == '$http_status_code'"
+    echo "[$(date +%H:%M:%S)] 错误：得到 http_status_code == '$http_status_code'"
     return 1
   fi
   return 0

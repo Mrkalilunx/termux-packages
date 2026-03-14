@@ -1,14 +1,12 @@
 #!/usr/bin/env node
 //
-// A script to check for checking difference between apt repository and
-// termux-packages
+// 用于检查 apt 仓库和 termux-packages 之间差异的脚本
 //
-// Currently checks the following:
-// - Missing packages in apt repository
-// - Version mismatches in apt repository and termux-packages
-// - Packages in apt repository that shouldn't exist (this may happen when a
-//   packages is removed in termux-packages, but wasn't removed from the apt
-//   repository)
+// 目前检查以下内容：
+// - apt 仓库中缺少的包
+// - apt 仓库和 termux-packages 中的版本不匹配
+// - apt 仓库中不应该存在的包（这可能发生在包在 termux-packages 中被删除，
+//   但没有从 apt 仓库中删除时）
 //
 import { readFile } from "node:fs/promises";
 import { gunzip } from "node:zlib";
@@ -20,10 +18,10 @@ const execFileAsync = promisify(execFile);
 const archs = ["aarch64", "arm", "i686", "x86_64"];
 
 if (process.argv.length != 3) {
-  console.error("Usage:");
+  console.error("用法：");
   console.error("./scripts/check-repository-health.js <path-to-output>");
   console.error(
-    "  where '<path-to-output>' is the path to directory where ./scripts/generate-apt-packages-list.sh has run",
+    "  其中 '<path-to-output>' 是 ./scripts/generate-apt-packages-list.sh 已运行的目录路径",
   );
   process.exit(1);
 }
@@ -32,7 +30,7 @@ const outputDir = process.argv[2];
 
 const repos = JSON.parse(await readFile("repo.json"));
 if (repos.pkg_format != "debian") {
-  console.error(`Unsupported package format: ${repos.pkg_format}`);
+  console.error(`不支持的包格式：${repos.pkg_format}`);
   process.exit(1);
 }
 const repoPathMap = new Map();
@@ -40,12 +38,12 @@ for (const path in repos) {
   if (path == "pkg_format") continue;
   const repo = repos[path];
   if (repoPathMap.has(repo.name)) {
-    console.error("Multiple repository paths with same repository name.");
+    console.error("多个仓库路径具有相同的仓库名称。");
     console.error(
-      "This should not be happening. repo.json file needs to be fixed",
+      "这不应该发生。需要修复 repo.json 文件",
     );
     console.error(
-      `Repository "${repo.name}" also exists for path "${path}" when it already existed for "${repoPathMap.get(path)}"`,
+      `仓库 "${repo.name}" 也存在于路径 "${path}"，而它已经存在于 "${repoPathMap.get(path)}"`,
     );
     process.exit(1);
   }
@@ -61,23 +59,21 @@ async function getAptPackages(
   termuxPackages,
 ) {
   // https://wiki.debian.org/DebianRepository/Format#A.22Packages.22_Indices
-  // The Packages file is a gzipped file containing a list of packages names,
-  // descriptions, versions and other info. Different entries are separated by
-  // an additional new line.
+  // Packages 文件是一个 gzip 压缩文件，包含包名称、描述、版本和其他信息的列表。
+  // 不同的条目由额外的换行符分隔。
 
-  // First fetch the Packages.gz file for the repository and architecture
+  // 首先获取仓库和架构的 Packages.gz 文件
   const url = `${repo.url}/dists/${repo.distribution}/${repo.component}/binary-${arch}/Packages.gz`;
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(
-      `Failed to fetch ${url}: ${response.status} ${response.statusText}`,
+      `获取 ${url} 失败：${response.status} ${response.statusText}`,
     );
   }
-  // gunzip the file to get the actual content
+  // gunzip 文件以获取实际内容
   const data = await gunzipAsync(await response.arrayBuffer());
 
-  // Now parse the file file and generate a map of package names to their
-  // version and repository name.
+  // 现在解析文件文件并生成包名称到其版本和仓库名称的映射。
   const aptPackages = new Map();
   let pkgName = undefined;
   let pkgVersion = undefined;
@@ -96,7 +92,7 @@ async function getAptPackages(
       } else if (line.startsWith("Filename: ")) {
         pkgFilename = line.substring("Filename: ".length);
       }
-      // New line indicates the end of a package entry
+      // 新行表示包条目的结束
       else if (line == "") {
         if (pkgName && pkgVersion && pkgFilename) {
           if (aptPackages.has(pkgName)) {
@@ -105,13 +101,13 @@ async function getAptPackages(
             if (termuxPackages.has(pkgName)) {
               lastModified = termuxPackages.get(pkgName).lastModified;
             }
-            // Only make this an error if the oldest deb with for the same package is older than 24 hours. The cron job on the server running aptly runs once every 6 hours, 24 hour is a bit more reasonable to make sure we don't fill errors that should not be there in case the cron job fails due to some reason
+            // 只有当同一包的最旧 deb 文件超过 24 小时时，才将其视为错误。服务器上运行 aptly 的 cron 作业每 6 小时运行一次，24 小时更合理，以确保如果 cron 作业因某种原因失败，我们不会填充不应该存在的错误
             if (currentTime - lastModified >= 3600 * 24) {
               errors.push(
-                `Duplicate package: "${pkgName}" when parsing Packages file for "${repo.name}" for "${arch}"`,
+                `重复的包："${pkgName}"，在为 "${repo.name}" 的 "${arch}" 解析 Packages 文件时`,
               );
               proposedManualFixes.push(
-                `Duplicate package "${pkgName}" will likely be removed automatically once the cron job responsible for cleaning older versions of packages kicks in on the aptly server.`,
+                `重复的包 "${pkgName}" 可能会在 aptly 服务器上负责清理旧版本包的 cron 作业启动时自动删除。`,
               );
             }
             try {
@@ -124,7 +120,7 @@ async function getAptPackages(
               aptPackages.get(pkgName).version = pkgVersion;
             } catch (e) {}
           } else {
-            // Only add the package version.
+            // 仅添加包版本。
             aptPackages.set(pkgName, {
               version: pkgVersion,
               filename: pkgFilename,
@@ -137,19 +133,17 @@ async function getAptPackages(
         pkgVersion = undefined;
       }
     });
-  // There should be extra newline at the end of the file, so this should
-  // never be true, but just in case we check it to ensure we parsed the file
-  // correctly.
+  // 文件末尾应该有额外的换行符，所以这永远不应该是 true，
+  // 但为了以防万一，我们检查它以确保我们正确解析了文件。
   if (pkgName || pkgVersion || pkgFilename) {
-    console.error(`Incomplete package entry in ${url}`);
+    console.error(`${url} 中的不完整包条目`);
     process.exit(1);
   }
 
   return aptPackages;
 }
 
-// Returns a map of package names to their version, repository name and whether
-// the package may have a -static subpackage.
+// 返回包名称到其版本、仓库名称以及包是否可能具有 -static 子包的映射。
 async function getTermuxPackages(
   arch,
   errors,
@@ -157,8 +151,8 @@ async function getTermuxPackages(
   proposedManualFixes,
 ) {
   const termuxPackages = new Map();
-  // "${outputDir}/apt-packages-list-${arch}.txt" is a file generated by
-  // `./scripts/generate-apt-packages-list.sh` script
+  // "${outputDir}/apt-packages-list-${arch}.txt" 是由
+  // `./scripts/generate-apt-packages-list.sh` 脚本生成的文件
   const data = await readFile(
     `${outputDir}/apt-packages-list-${arch}.txt`,
     "utf8",
@@ -170,9 +164,9 @@ async function getTermuxPackages(
       let [pkgName, pkgRepo, pkgVersion, pkgMayHaveStaticSubpkg] =
         line.split(" ");
       if (termuxPackages.has(pkgName)) {
-        errors.push(`Duplicate package in termux-packages: "${pkgName}"`);
+        errors.push(`termux-packages 中的重复包："${pkgName}"`);
         proposedManualFixes.push(
-          `Duplicate package "${pkgName}" earlier found in "${termuxPackages.get(pkgName).repo}" also in "${pkgRepo}" needs to be removed from termux-packages`,
+          `之前在 "${termuxPackages.get(pkgName).repo}" 中发现的重复包 "${pkgName}" 也存在于 "${pkgRepo}" 中，需要从 termux-packages 中删除`,
         );
       }
       const { stdout } = execFileAsync("git", [
@@ -194,9 +188,8 @@ async function getTermuxPackages(
 
 async function getErrorsForArch(arch) {
   const errors = [];
-  // This is a shell script which the maintainers can simply run on the aptly
-  // server to fix all errors that can the script was able to figure out the
-  // fix for.
+  // 这是一个 shell 脚本，维护者可以简单地在 aptly 服务器上运行它，
+  // 以修复脚本能够找出修复方法的所有错误。
   const proposedAutomatedFixes = [];
   const proposedManualFixes = [];
   const termuxPackages = await getTermuxPackages(
@@ -210,7 +203,7 @@ async function getErrorsForArch(arch) {
     if (path == "pkg_format") continue;
     const repo = repos[path];
 
-    // Get list of packages in apt repository and then add them to the map of all apt packages
+    // 获取 apt 仓库中的包列表，然后将它们添加到所有 apt 包的映射中
     const currentAptRepoPackages = await getAptPackages(
       repo,
       arch,
@@ -220,42 +213,42 @@ async function getErrorsForArch(arch) {
       termuxPackages,
     );
     for (const [pkgName, pkgInfo] of currentAptRepoPackages) {
-      // Check if the package should exist in this repository in the first place
+      // 检查包是否应该首先存在于这个仓库中
       if (termuxPackages.has(pkgName)) {
-        // Check if the package is in the correct repo
+        // 检查包是否在正确的仓库中
         if (termuxPackages.get(pkgName).repo != pkgInfo.repo) {
-          // If not in correct repo, then it must be removed
+          // 如果不在正确的仓库中，则必须删除它
           errors.push(
-            `Package "${pkgName}" exists in "${pkgInfo.repo}" but should be in "${termuxPackages.get(pkgName).repo}"`,
+            `包 "${pkgName}" 存在于 "${pkgInfo.repo}" 中，但应该在 "${termuxPackages.get(pkgName).repo}" 中`,
           );
           proposedAutomatedFixes.push(
             `aptly repo remove "${pkgInfo.repo}" "${pkgName} (=${pkgInfo.version}) {${arch}}"`,
           );
         } else {
-          // If it's in the correct repo, make sure it is the same version as we have in termux-packages
+          // 如果它在正确的仓库中，确保它与我们在 termux-packages 中的版本相同
           if (termuxPackages.get(pkgName).version != pkgInfo.version) {
             errors.push(
-              `"${pkgName}" "${pkgInfo.version}" (in apt repository) != "${termuxPackages.get(pkgName).version}" (in termux-packages)`,
+              `"${pkgName}" "${pkgInfo.version}"（在 apt 仓库中）!= "${termuxPackages.get(pkgName).version}"（在 termux-packages 中）`,
             );
             proposedManualFixes.push(
-              `The package "${pkgName}" in "${pkgInfo.repo}" may not be up to date on the apt repository or a bogus version may be present`,
+              `"${pkgInfo.repo}" 中的包 "${pkgName}" 在 apt 仓库上可能不是最新的，或者可能存在虚假版本`,
             );
           }
           aptPackages.set(pkgName, pkgInfo);
         }
       } else {
-        // If it's a static package, we need to repeat some of what we did earlier.
-        // -static packages are automatically generated, so they may cease to exist in newer versions when no static libraries exist in newer versions of base package
+        // 如果是静态包，我们需要重复之前做的一些操作。
+        // -static 包是自动生成的，因此当基础包的较新版本中不存在静态库时，它们可能在较新版本中不再存在
         if (pkgName.endsWith("-static")) {
           const basePkgName = pkgName.substring(
             0,
             pkgName.length - "-static".length,
           );
           if (termuxPackages.has(basePkgName)) {
-            // Check for TERMUX_PKG_NO_STATICSPLIT
+            // 检查 TERMUX_PKG_NO_STATICSPLIT
             if (!termuxPackages.get(basePkgName).mayHaveStaticSubpkg) {
               errors.push(
-                `"${pkgName}" ${pkgInfo.version}: static package should not exist as parent package "${basePkgName}" has TERMUX_PKG_NO_STATICSPLIT=true`,
+                `"${pkgName}" ${pkgInfo.version}: 静态包不应该存在，因为父包 "${basePkgName}" 具有 TERMUX_PKG_NO_STATICSPLIT=true`,
               );
               proposedAutomatedFixes.push(
                 `aptly repo remove "${pkgInfo.repo}" "${pkgName} (=${pkgInfo.version}) {${arch}}"`,
@@ -263,7 +256,7 @@ async function getErrorsForArch(arch) {
             } else {
               if (termuxPackages.get(basePkgName).version != pkgInfo.version) {
                 errors.push(
-                  `"${pkgName}" "${pkgInfo.version}" != ${termuxPackages.get(basePkgName).version} as expected by parent package. The -static package probably stopped existing after an update.`,
+                  `"${pkgName}" "${pkgInfo.version}" != ${termuxPackages.get(basePkgName).version}，与父包预期的不同。-static 包可能在更新后停止存在。`,
                 );
                 proposedAutomatedFixes.push(
                   `aptly repo remove "${pkgInfo.repo}" "${pkgName} (=${pkgInfo.version}) {${arch}}"`,
@@ -272,18 +265,18 @@ async function getErrorsForArch(arch) {
               aptPackages.set(pkgName, pkgInfo);
             }
           } else {
-            // This happens when the parent package was removed from the repository
+            // 当父包从仓库中删除时会发生这种情况
             errors.push(
-              `"${pkgName}" ${pkgInfo.version}: static package has no parent package`,
+              `"${pkgName}" ${pkgInfo.version}: 静态包没有父包`,
             );
             proposedAutomatedFixes.push(
               `aptly repo remove "${pkgInfo.repo}" "${pkgName} (=${pkgInfo.version}) {${arch}}"`,
             );
           }
         } else {
-          // It's not a static package, and it does not exists in termux-packages for that repository. So it should not exist
+          // 它不是静态包，并且在该仓库的 termux-packages 中不存在。所以它不应该存在
           errors.push(
-            `"${pkgName}" "${pkgInfo.version}" does not exist in termux-packages`,
+            `"${pkgName}" "${pkgInfo.version}" 在 termux-packages 中不存在`,
           );
           proposedAutomatedFixes.push(
             `aptly repo remove "${pkgInfo.repo}" "${pkgName} (=${pkgInfo.version}) {${arch}}"`,
@@ -293,14 +286,14 @@ async function getErrorsForArch(arch) {
     }
   }
 
-  // Now check for packages missing in apt repository but present in termux-packages
+  // 现在检查 apt 仓库中缺少但存在于 termux-packages 中的包
   for (const [termuxPkgName, termuxPkgInfo] of termuxPackages) {
     if (!aptPackages.has(termuxPkgName)) {
-      errors.push(`"${termuxPkgName}" missing in apt repository`);
+      errors.push(`"${termuxPkgName}" 在 apt 仓库中缺少`);
       proposedManualFixes.push(
-        `The package "${termuxPkgName}" in "${termuxPkgInfo.repo}" is missing in the apt repository, it likely needs to be rebuilt`,
+        `"${termuxPkgInfo.repo}" 中的包 "${termuxPkgName}" 在 apt 仓库中缺少，它可能需要重新构建`,
       );
-    } /* else {} */ // We already checked the versions for packages that exist in both maps
+    } /* else {} */ // 我们已经检查了两个映射中都存在的包的版本
   }
   return {
     errors,
@@ -321,10 +314,10 @@ let hasErrors = false;
 
 for (let i = 0; i < archs.length; i++) {
   if (results[i].errors.length > 0) {
-    console.log(`### Errors found for ${archs[i]}`);
+    console.log(`### 为 ${archs[i]} 发现的错误`);
 
     console.log("<details>");
-    console.log("  <summary>Errors:</summary>");
+    console.log("  <summary>错误：</summary>");
     console.log("");
     console.log("```");
     console.log(results[i].errors.join("\n"));
@@ -335,7 +328,7 @@ for (let i = 0; i < archs.length; i++) {
     console.log("\n\n");
 
     console.log("<details>");
-    console.log("  <summary>Proposed Automated fixes:</summary>");
+    console.log("  <summary>建议的自动修复：</summary>");
     console.log("");
     console.log("```sh");
     console.log(results[i].proposedAutomatedFixes.join("\n"));
@@ -345,7 +338,7 @@ for (let i = 0; i < archs.length; i++) {
     console.log("\n\n");
 
     console.log("<details>");
-    console.log("  <summary>Proposed Manual fixes:</summary>");
+    console.log("  <summary>建议的手动修复：</summary>");
     console.log("");
     console.log("```");
     console.log(results[i].proposedManualFixes.join("\n"));

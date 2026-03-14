@@ -12,9 +12,9 @@ termux_setup_gn() {
 
 	if [ "$TERMUX_ON_DEVICE_BUILD" = "false" ]; then
 		if [ ! -d "$GN_FOLDER" ]; then
-			# FIXME: We would like to enable checksums when downloading
-			# tar files, but they change each time as the tar metadata
-			# differs: https://github.com/google/gitiles/issues/84
+			# FIXME: 我们希望在下载时启用校验和
+			# tar 文件，但它们每次都会更改，因为 tar 元数据
+			# 不同：https://github.com/google/gitiles/issues/84
 			termux_download \
 				$GN_SOURCE \
 				$GN_TARFILE \
@@ -46,8 +46,8 @@ termux_setup_gn() {
 	else
 		if [[ "$TERMUX_APP_PACKAGE_MANAGER" = "apt" && "$(dpkg-query -W -f '${db:Status-Status}\n' gn 2>/dev/null)" != "installed" ]] ||
                    [[ "$TERMUX_APP_PACKAGE_MANAGER" = "pacman" && ! "$(pacman -Q gn 2>/dev/null)" ]]; then
-			echo "Package 'gn' is not installed."
-			echo "You can install it with"
+			echo "未安装 'gn' 软件包。"
+			echo "您可以通过以下方式安装："
 			echo
 			echo "  pkg install gn"
 			echo

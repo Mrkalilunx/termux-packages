@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Utility function to setup a GHC cross-compiler toolchain targeting Android.
+# 实用工具函数，用于设置面向 Android 的 GHC 交叉编译器工具链。
 termux_setup_ghc() {
 	local TERMUX_GHC_VERSION=9.12.2
 	local GHC_PREFIX="ghc-cross-$TERMUX_GHC_VERSION-$TERMUX_ARCH"
@@ -54,7 +54,7 @@ termux_setup_ghc() {
 	else
 		if [[ "$TERMUX_APP_PACKAGE_MANAGER" == "apt" ]] && "$(dpkg-query -W -f '${db:Status-Status}\n' ghc 2>/dev/null)" != "installed" ||
 			[[ "$TERMUX_APP_PACKAGE_MANAGER" == "pacman" ]] && ! "$(pacman -Q ghc 2>/dev/null)"; then
-			echo "Package 'ghc' is not installed."
+			echo "未安装 'ghc' 软件包。"
 			exit 1
 		fi
 	fi

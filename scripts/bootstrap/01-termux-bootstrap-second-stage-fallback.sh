@@ -2,28 +2,27 @@
 # shellcheck shell=sh
 
 (
-	# If termux bootstrap second stage has never been run, like in case
-	# bootstrap was extracted to rootfs from a shell instead of by the
-	# by the Termux app, which normally runs the second stage, then run it.
-	# This is currently an issue of pacman bootstraps, which are not
-	# supported by the Termux app and both extraction and second stage
-	# are run from a shell. Once support has been added, this script
-	# will be removed.
-	# Termux app wipes the prefix directory if second stage fails,
-	# as otherwise when app is restarted, the broken prefix directory
-	# would be used and logged into. We do not do that here as that
-	# may wipe other changes done to prefix and users should wipe
-	# manually if needed. We do not delete the lock file on failure
-	# as then second stage will run again when new shell is started
-	# which may affect already configured packages.
-	# The shell should still load if second stage run below fails.
+	# 如果 termux bootstrap 第二阶段从未运行过，例如在情况下
+	# bootstrap 是从 shell 提取到 rootfs，而不是由
+	# Termux 应用，后者通常运行第二阶段，那么运行它。
+	# 这目前是 pacman bootstrap 的问题，它不被
+	# Termux 应用支持，提取和第二阶段
+	# 都是从 shell 运行的。一旦添加了支持，此脚本
+	# 将被删除。
+	# 如果第二阶段失败，Termux 应用会擦除前缀目录，
+	# 否则当应用重新启动时，损坏的前缀目录
+	# 将被使用并登录。我们不在这里这样做，因为那
+	# 可能会擦除对前缀所做的其他更改，如果需要，用户应该手动
+	# 擦除。我们不会在失败时删除锁文件，因为这样当启动新的 shell 时
+	# 第二阶段将再次运行，这可能会影响已配置的包。
+	# 如果下面运行的第二阶段失败，shell 仍应加载。
 	if [ ! -L "@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_DIR@/@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@.lock" ]; then
-		echo "Starting fallback run of termux bootstrap second stage"
+		echo "开始 termux bootstrap 第二阶段的后备运行"
 		chmod +x "@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_DIR@/@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@" || exit $?
 		"@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_DIR@/@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@" || exit $?
 	fi
 
-	# Delete script itself so that it is never run again
+	# 删除脚本本身，使其永远不会再次运行
 	rm -f "@TERMUX__PREFIX__PROFILE_D_DIR@/01-termux-bootstrap-second-stage-fallback.sh" || exit $?
 
 ) || return $?

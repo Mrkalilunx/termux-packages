@@ -1,25 +1,25 @@
-# This script setups host python and crossenv for cross-compilation of python
-# packages. Requires python package to be built before this script is called.
+# 此脚本设置主 python 和 crossenv 用于 python
+# 软件包的交叉编译。需要在此脚本调用之前构建 python 软件包。
 #
-# It is highly recommended checking out documentation of
-# termux_setup_build_python before using this script
+# 强烈建议在使用此脚本之前查看
+# termux_setup_build_python 的文档
 termux_setup_python_pip() {
 	termux_setup_build_python
 	if [ "$TERMUX_ON_DEVICE_BUILD" = "true" ]; then
 		if [[ "$TERMUX_APP_PACKAGE_MANAGER" = "apt" && "$(dpkg-query -W -f '${db:Status-Status}\n' python-pip 2>/dev/null)" != "installed" ]] ||
 		[[ "$TERMUX_APP_PACKAGE_MANAGER" = "pacman" && ! "$(pacman -Q python-pip 2>/dev/null)" ]]; then
-			echo "Package 'python-pip' is not installed."
-			echo "You can install it with"
+			echo "未安装 'python-pip' 软件包。"
+			echo "您可以通过以下方式安装："
 			echo
 			echo "  pkg install python-pip"
 			echo
 			echo "  pacman -S python-pip"
 			echo
-			echo "Note that package 'python-pip' is known to be problematic for building on device."
+			echo "注意：'python-pip' 软件包在设备上构建时已知存在问题。"
 			exit 1
 		fi
 
-		# Setup a virtual environment and do not mess the system site-packages
+		# 设置虚拟环境，不要破坏系统 site-packages
 		local _VENV_DIR="${TERMUX_PKG_TMPDIR}/venv-dir"
 
 		mkdir -p "$_VENV_DIR"
@@ -52,7 +52,7 @@ termux_setup_python_pip() {
 			shopt -s nullglob
 			local f
 			for f in "$TERMUX_SCRIPTDIR"/scripts/build/setup/python-crossenv-*.patch; do
-				echo "[${FUNCNAME[0]}]: Applying $(basename "$f")"
+				echo "[${FUNCNAME[0]}]: 正在应用 $(basename "$f")"
 				cat "$f" | sed -e "s|@@TERMUX_PKG_API_LEVEL@@|${TERMUX_PKG_API_LEVEL}|g" | patch --silent -p1 -d "$_CROSSENV_FOLDER"
 			done
 			shopt -u nullglob
@@ -66,8 +66,8 @@ termux_setup_python_pip() {
 		fi
 		. "${TERMUX_PYTHON_CROSSENV_PREFIX}/bin/activate"
 
-		# Since 3.12, distutils is removed from python, but setuptools>=60 provides it
-		# Since wheel 0.46, setuptools>=70 is required to provide bdist_wheel
+		# 自 3.12 起，distutils 已从 python 中移除，但 setuptools>=60 提供了它
+		# 自 wheel 0.46 起，setuptools>=70 是提供 bdist_wheel 所必需的
 		build-pip install 'setuptools==80.9.0' 'wheel==0.46.1'
 		cross-pip install 'setuptools==80.9.0' 'wheel==0.46.1'
 

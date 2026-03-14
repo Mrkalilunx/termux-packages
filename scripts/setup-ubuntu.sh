@@ -3,20 +3,20 @@ set -e -u
 
 PACKAGES=""
 
-# For en_US.UTF-8 locale.
+# 用于 en_US.UTF-8 语言环境。
 PACKAGES+=" locales"
 
-# To provide /usr/bin/python as symlink to /usr/bin/python3
+# 提供将 /usr/bin/python 作为符号链接到 /usr/bin/python3
 PACKAGES+=" python-is-python3"
 
-# Used by build-package.sh and CI/CD scripts.
+# 由 build-package.sh 和 CI/CD 脚本使用。
 PACKAGES+=" curl"
 PACKAGES+=" gnupg"
 
-# Used for fetching package sources from Git repositories.
+# 用于从 Git 仓库获取包源代码。
 PACKAGES+=" git"
 
-# Used for extracting package sources.
+# 用于提取包源代码。
 PACKAGES+=" lzip"
 PACKAGES+=" tar"
 PACKAGES+=" unzip"
@@ -25,11 +25,11 @@ PACKAGES+=" lzop"
 PACKAGES+=" lz4"
 PACKAGES+=" zstd"
 
-# userspace overlayfs implementation for rootless containers
-# Used to setup NDK toolchain without having to copy the whole toolchain to save some disk space
+# 用于无根容器的用户空间 overlayfs 实现
+# 用于设置 NDK 工具链，而无需复制整个工具链以节省一些磁盘空间
 PACKAGES+=" fuse-overlayfs"
 
-# Used by common build systems.
+# 由常用构建系统使用。
 PACKAGES+=" autoconf"
 PACKAGES+=" autogen"
 PACKAGES+=" automake"
@@ -49,7 +49,7 @@ PACKAGES+=" m4"
 PACKAGES+=" pkg-config"
 PACKAGES+=" scons"
 
-# Used to generate package documentation.
+# 用于生成包文档。
 PACKAGES+=" asciidoc"
 PACKAGES+=" asciidoctor"
 PACKAGES+=" go-md2man"
@@ -68,134 +68,134 @@ PACKAGES+=" txt2man"
 PACKAGES+=" xmlto"
 PACKAGES+=" xmltoman"
 
-# Needed by python modules (e.g. asciinema) and some build systems.
+# python 模块（例如 asciinema）和某些构建系统需要。
 PACKAGES+=" python3-pip"
 PACKAGES+=" python3-setuptools"
 PACKAGES+=" python-wheel-common"
 PACKAGES+=" python3.12-venv"
 
-# Needed by package bc.
+# 包 bc 需要。
 PACKAGES+=" ed"
 
-# Needed by gnunet.
+# gnunet 需要。
 PACKAGES+=" recutils"
 
-# Provides utility hexdump which is needed by package bitcoin.
+# 提供包 bitcoin 需要的实用程序 hexdump。
 PACKAGES+=" bsdmainutils"
 
-# Needed by package seafile-client.
+# 包 seafile-client 需要。
 PACKAGES+=" valac"
 
-# Needed by package libgcrypt.
+# 包 libgcrypt 需要。
 PACKAGES+=" fig2dev"
 
-# Needed by package gimp.
+# 包 gimp 需要。
 PACKAGES+=" gegl"
 
-# Needed by package libidn2.
+# 包 libidn2 需要。
 PACKAGES+=" gengetopt"
 
-# Needed by package dbus-glib.
+# 包 dbus-glib 需要。
 PACKAGES+=" libdbus-1-dev"
 
-# Needed by package below.
+# 下面的包需要。
 PACKAGES+=" libelf-dev"
 
-# Needed by package ghostscript.
+# 包 ghostscript 需要。
 PACKAGES+=" libexpat1-dev"
 PACKAGES+=" libjpeg-dev"
 
-# Needed by package gimp3.
+# 包 gimp3 需要。
 PACKAGES+=" librsvg2-dev"
 
-# Needed by package news-flash-gtk.
+# 包 news-flash-gtk 需要。
 PACKAGES+=" libsqlite3-dev"
 
-# Needed by package luarocks.
+# 包 luarocks 需要。
 PACKAGES+=" lua5.4"
 
-# Needed by package fennel.
+# 包 fennel 需要。
 PACKAGES+=" lua5.3"
 
-# Needed by package vlc.
+# 包 vlc 需要。
 PACKAGES+=" lua5.2"
 
-# Used bt host build of package mariadb.
+# 由包 mariadb 的主机构建使用。
 PACKAGES+=" libncurses5-dev"
 
-# Needed to build neovim >= 8.0.0
+# 构建 neovim >= 8.0.0 需要
 PACKAGES+=" lua-lpeg"
 PACKAGES+=" lua-mpack"
 
-# Needed by host build of package ruby.
+# 包 ruby 的主机构建需要。
 PACKAGES+=" libyaml-dev"
 
-# Needed by package mkvtoolnix.
+# 包 mkvtoolnix 需要。
 PACKAGES+=" ruby"
 
-# Needed by host build of package nodejs.
+# 包 nodejs 的主机构建需要。
 PACKAGES+=" libc-ares-dev"
 PACKAGES+=" libc-ares-dev:i386"
 PACKAGES+=" libicu-dev"
 PACKAGES+=" libsqlite3-dev:i386"
 
-# Needed by php.
+# php 需要。
 PACKAGES+=" re2c"
 
-# Needed by composer.
+# composer 需要。
 PACKAGES+=" php"
 PACKAGES+=" php-xml"
 PACKAGES+=" composer"
 
-# Needed by package rust.
+# 包 rust 需要。
 PACKAGES+=" libssl-dev"
 
-# Needed by librusty-v8
+# librusty-v8 需要
 PACKAGES+=" libclang-rt-17-dev"
 PACKAGES+=" libclang-rt-17-dev:i386"
 
-# Needed for package smalltalk.
+# 包 smalltalk 需要。
 PACKAGES+=" libsigsegv-dev"
 PACKAGES+=" zip"
 
-# Needed for package sqlcipher.
+# 包 sqlcipher 需要。
 PACKAGES+=" tcl"
 
-# Needed by package swi-prolog.
+# 包 swi-prolog 需要。
 PACKAGES+=" openssl"
 PACKAGES+=" zlib1g-dev"
 PACKAGES+=" libssl-dev:i386"
 PACKAGES+=" zlib1g-dev:i386"
 
-# For swift.
+# 用于 swift。
 PACKAGES+=" lld"
 
-# Needed by wrk.
+# wrk 需要。
 PACKAGES+=" luajit"
 
-# Needed by libduktape
+# libduktape 需要
 PACKAGES+=" bc"
 
-# needed by ovmf
+# ovmf 需要
 PACKAGES+=" libarchive-tools"
 
-# Needed by cavif-rs
+# cavif-rs 需要
 PACKAGES+=" nasm"
 
-# Needed by debianutils
+# debianutils 需要
 PACKAGES+=" po4a"
 
-# Needed by dgsh
+# dgsh 需要
 PACKAGES+=" rsync"
 
-# Needed by megacmd
+# megacmd 需要
 PACKAGES+=" wget"
 
-# Needed by codeblocks
+# codeblocks 需要
 PACKAGES+=" libwxgtk3.2-dev"
 PACKAGES+=" libgtk-3-dev"
 
-# Needed by packages in unstable repository.
+# unstable 仓库中的包需要。
 PACKAGES+=" comerr-dev"
 PACKAGES+=" docbook-to-man"
 PACKAGES+=" docbook-utils"
@@ -210,7 +210,7 @@ PACKAGES+=" libparse-yapp-perl"
 PACKAGES+=" libreadline-dev"
 PACKAGES+=" libunistring-dev"
 
-# Needed by packages in X11 repository.
+# X11 仓库中的包需要。
 PACKAGES+=" alex"
 PACKAGES+=" docbook-xsl-ns"
 PACKAGES+=" gnome-common"
@@ -231,111 +231,111 @@ PACKAGES+=" xfonts-utils"
 PACKAGES+=" xutils-dev"
 PACKAGES+=" desktop-file-utils"
 
-# Needed by packages in science repository
+# science 仓库中的包需要
 PACKAGES+=" protobuf-c-compiler"
 PACKAGES+=" sqlite3"
 
-# Needed by packages in game repository
+# game 仓库中的包需要
 PACKAGES+=" cvs"
 PACKAGES+=" python3-yaml"
 
-# Needed by gobject-introspection (termux_setup_gir).
+# gobject-introspection (termux_setup_gir) 需要。
 PACKAGES+=" bash-static"
 
-# Needed by apt.
+# apt 需要。
 PACKAGES+=" triehash"
 
-# Needed by aspell dictionaries.
+# aspell 字典需要。
 PACKAGES+=" aspell"
 
-# Needed by package gdb.
+# 包 gdb 需要。
 PACKAGES+=" guile-3.0-dev"
 
-# Needed by package kphp.
+# 包 kphp 需要。
 PACKAGES+=" python3-jsonschema"
 
-# Needed by package lilypond.
+# 包 lilypond 需要。
 PACKAGES+=" fontforge-nox"
 PACKAGES+=" guile-3.0"
 PACKAGES+=" python3-fontforge"
 PACKAGES+=" texlive-metapost"
 
-# Needed by package motif.
+# 包 motif 需要。
 PACKAGES+=" libfl-dev"
 PACKAGES+=" libxft-dev"
 PACKAGES+=" libxt-dev"
 PACKAGES+=" xbitmaps"
 
-# Required by cava
+# cava 需要
 PACKAGES+=" xxd"
 
-# Required by samba
+# samba 需要
 PACKAGES+=" libjson-perl"
 
-# Required for parsing repo.json
+# 解析 repo.json 需要
 PACKAGES+=" jq"
 
-# Required by txikijs's hostbuild step
+# txikijs 的主机构建步骤需要
 PACKAGES+=" libcurl4-openssl-dev"
 
-# Required by openjdk-17
+# openjdk-17 需要
 PACKAGES+=" openjdk-17-jre openjdk-17-jdk"
 
-# Required by openjdk-21
+# openjdk-21 需要
 PACKAGES+=" openjdk-21-jre openjdk-21-jdk"
 
-# Required by qt5-qtwebengine
+# qt5-qtwebengine 需要
 PACKAGES+=" libnss3 libnss3:i386 libnss3-dev"
 PACKAGES+=" libwebp7 libwebp7:i386 libwebp-dev"
 PACKAGES+=" libwebpdemux2 libwebpdemux2:i386"
 PACKAGES+=" libwebpmux3 libwebpmux3:i386"
 
-# Required by chromium-based packages
+# 基于 chromium 的包需要
 PACKAGES+=" libfontconfig1"
 PACKAGES+=" libfontconfig1:i386"
 PACKAGES+=" libcups2-dev"
 PACKAGES+=" libglib2.0-0t64:i386"
 PACKAGES+=" libexpat1:i386"
 
-# Required by code-oss
+# code-oss 需要
 PACKAGES+=" libxkbfile-dev"
 PACKAGES+=" libsecret-1-dev"
 PACKAGES+=" libkrb5-dev"
 
-# Required by wine-stable
+# wine-stable 需要
 PACKAGES+=" libfreetype-dev:i386"
 
-# Required by CGCT
+# CGCT 需要
 PACKAGES+=" libdebuginfod-dev"
 
-# Needed to set up CGCT and also to set up other packages
+# 设置 CGCT 以及设置其他包需要
 PACKAGES+=" patchelf"
 
-# Needed by lldb for python integration
+# lldb 用于 python 集成需要
 PACKAGES+=" swig"
 
-# Needed by binutils-cross
+# binutils-cross 需要
 PACKAGES+=" libzstd-dev"
 
-# Needed by wlroots
+# wlroots 需要
 PACKAGES+=" glslang-tools"
 
-# Do not require sudo if already running as root.
+# 如果已经以 root 身份运行，则不需要 sudo。
 SUDO="sudo"
 if [ "$(id -u)" = "0" ]; then
 	SUDO=""
 fi
 
-# Allow 32-bit packages.
+# 允许 32 位包。
 $SUDO dpkg --add-architecture i386
 
-# Install jq first, then source properties.sh
+# 首先安装 jq，然后 source properties.sh
 $SUDO env DEBIAN_FRONTEND=noninteractive \
 	apt-get install -yq --no-install-recommends jq
 
 . $(dirname "$(realpath "$0")")/properties.sh
 
-# Add apt.llvm.org repo to get newer LLVM than Ubuntu provided
+# 添加 apt.llvm.org 仓库以获取比 Ubuntu 提供的更新的 LLVM
 $SUDO cp $(dirname "$(realpath "$0")")/llvm-snapshot.gpg.key /etc/apt/trusted.gpg.d/apt.llvm.org.asc
 $SUDO chmod a+r /etc/apt/trusted.gpg.d/apt.llvm.org.asc
 {
@@ -344,7 +344,7 @@ $SUDO chmod a+r /etc/apt/trusted.gpg.d/apt.llvm.org.asc
 
 LLVM_PACKAGES=""
 
-# Needed by rust and other packages.
+# rust 和其他包需要。
 LLVM_PACKAGES+=" llvm-${TERMUX_HOST_LLVM_MAJOR_VERSION}-dev"
 LLVM_PACKAGES+=" llvm-${TERMUX_HOST_LLVM_MAJOR_VERSION}-tools"
 LLVM_PACKAGES+=" clang-${TERMUX_HOST_LLVM_MAJOR_VERSION}"
@@ -358,20 +358,20 @@ $SUDO env DEBIAN_FRONTEND=noninteractive \
 $SUDO locale-gen --purge en_US.UTF-8
 echo -e 'LANG="en_US.UTF-8"\nLANGUAGE="en_US:en"\n' | $SUDO tee -a /etc/default/locale
 
-# Ownership of `TERMUX__PREFIX` must be fixed before `TERMUX_APP__DATA_DIR`
-# if its under it, otherwise `TERMUX__ROOTFS` will not have its ownership fixed.
+# 如果 `TERMUX__PREFIX` 在 `TERMUX_APP__DATA_DIR` 下，则必须在 `TERMUX_APP__DATA_DIR` 之前修复其所有权
+# 否则 `TERMUX__ROOTFS` 将不会修复其所有权。
 $SUDO mkdir -p "$TERMUX__PREFIX"
 $SUDO chown -R "$(whoami)" "$TERMUX__PREFIX"
 $SUDO mkdir -p "$TERMUX_APP__DATA_DIR"
-$SUDO chown -R "$(whoami)" "${TERMUX_APP__DATA_DIR%"${TERMUX_APP__DATA_DIR#/*/}"}" # Get `/path/` from `/path/to/app__data_dir`.
+$SUDO chown -R "$(whoami)" "${TERMUX_APP__DATA_DIR%"${TERMUX_APP__DATA_DIR#/*/}"}" # 从 `/path/to/app__data_dir` 获取 `/path/`。
 
-# Initial symbolic link in the symbolic link chain for packages
-# that have a build dependency on 'aosp-libs'; see scripts/build/termux_step_override_config_scripts.sh
-# and scripts/build/setup/termux_setup_proot.sh for more information
+# 包的符号链接链中的初始符号链接
+# 这些包具有 'aosp-libs' 的构建依赖；请参阅 scripts/build/termux_step_override_config_scripts.sh
+# 和 scripts/build/setup/termux_setup_proot.sh 以获取更多信息
 $SUDO ln -sf "$TERMUX_APP__DATA_DIR/aosp" /system
 
-# Install newer pkg-config then what ubuntu provides, as the stock
-# ubuntu version has performance problems with at least protobuf:
+# 安装比 Ubuntu 提供的更新的 pkg-config，因为库存
+# ubuntu 版本在至少 protobuf 方面存在性能问题：
 PKGCONF_VERSION=2.3.0
 PKGCONF_SHA256=3a9080ac51d03615e7c1910a0a2a8df08424892b5f13b0628a204d3fcce0ea8b
 HOST_TRIPLET=$(gcc -dumpmachine)
@@ -392,5 +392,5 @@ make
 $SUDO make install
 cd -
 rm -Rf /tmp/pkgconf-build
-# Prevent package from being upgraded and overwriting our manual installation:
+# 防止包被升级并覆盖我们的手动安装：
 $SUDO apt-mark hold pkgconf

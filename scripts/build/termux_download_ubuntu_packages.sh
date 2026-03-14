@@ -32,10 +32,10 @@ termux_download_ubuntu_packages() {
 
 	local cache_directory="${TERMUX_PKG_TMPDIR}/Packages_ubuntu_${UBUNTU_RELEASE}_${ARCHITECTURE}"
 
-	# Fetch and cache the package lists for the repo channels
+	# 获取并缓存仓库通道的包列表
 	local channel
 	for channel in "main" "restricted" "universe" "multiverse"; do
-		# Do we already have this?
+		# 我们是否已经有这个了？
 		if [[ ! -e "${cache_directory}_$channel.gz" ]]; then
 			echo "Downloading package index for Ubuntu '$UBUNTU_RELEASE:${ARCHITECTURE}' ${channel}"
 			curl -sL \

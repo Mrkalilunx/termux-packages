@@ -1,6 +1,6 @@
 termux_step_create_debian_package() {
 	if [ "$TERMUX_PKG_METAPACKAGE" = "true" ]; then
-		# Metapackage doesn't have data inside.
+		# 元包内部没有数据。
 		rm -rf data
 	fi
 	tar --sort=name \
@@ -8,11 +8,11 @@ termux_step_create_debian_package() {
 		--owner=0 --group=0 --numeric-owner \
 		-cJf "$TERMUX_PKG_PACKAGEDIR/data.tar.xz" -H gnu .
 
-	# Get install size. This will be written as the "Installed-Size" deb field so is measured in 1024-byte blocks:
+	# 获取安装大小。这将被写入为 "Installed-Size" deb 字段，因此以 1024 字节块为单位测量：
 	local TERMUX_PKG_INSTALLSIZE
 	TERMUX_PKG_INSTALLSIZE=$(du -sk . | cut -f 1)
 
-	# From here on TERMUX_ARCH is set to "all" if TERMUX_PKG_PLATFORM_INDEPENDENT is set by the package
+	# 从现在开始，如果包设置了 TERMUX_PKG_PLATFORM_INDEPENDENT，则 TERMUX_ARCH 被设置为 "all"
 	[ "$TERMUX_PKG_PLATFORM_INDEPENDENT" = "true" ] && TERMUX_ARCH=all
 
 	mkdir -p DEBIAN
@@ -44,19 +44,19 @@ termux_step_create_debian_package() {
 	test ! -z "$TERMUX_PKG_SUGGESTS" && echo "Suggests: $TERMUX_PKG_SUGGESTS" >> DEBIAN/control
 	echo "Description: $TERMUX_PKG_DESCRIPTION" >> DEBIAN/control
 
-	# Create DEBIAN/conffiles (see https://www.debian.org/doc/debian-policy/ap-pkg-conffiles.html):
+	# 创建 DEBIAN/conffiles（参见 https://www.debian.org/doc/debian-policy/ap-pkg-conffiles.html）：
 	for f in $TERMUX_PKG_CONFFILES; do echo "$TERMUX_PREFIX_CLASSICAL/$f" >> DEBIAN/conffiles; done
 
-	# Allow packages to create arbitrary control files.
-	# XXX: Should be done in a better way without a function?
+	# 允许包创建任意控制文件。
+	# XXX：应该在没有函数的情况下以更好的方式完成？
 	cd DEBIAN
 	termux_step_create_debscripts
-	# Process `update-alternatives` entries from `.alternatives` files
-	# These need to be merged into the `.postinst` and `.prerm` files, so after those are created.
+	# 处理来自 `.alternatives` 文件的 `update-alternatives` 条目
+	# 这些需要合并到 `.postinst` 和 `.prerm` 文件中，因此在创建这些文件之后。
 	termux_step_update_alternatives
 	termux_step_create_python_debscripts
 
-	# Create control.tar.xz
+	# 创建 control.tar.xz
 	tar --sort=name \
 		--mtime="@${SOURCE_DATE_EPOCH}" \
 		--owner=0 --group=0 --numeric-owner \
@@ -64,7 +64,7 @@ termux_step_create_debian_package() {
 
 	test ! -f "$TERMUX_COMMON_CACHEDIR/debian-binary" && echo "2.0" > "$TERMUX_COMMON_CACHEDIR/debian-binary"
 	TERMUX_PKG_DEBFILE=$TERMUX_OUTPUT_DIR/${TERMUX_PKG_NAME}${DEBUG}_${TERMUX_PKG_FULLVERSION}_${TERMUX_ARCH}.deb
-	# Create the actual .deb file:
+	# 创建实际的 .deb 文件：
 	${AR-ar} cr "$TERMUX_PKG_DEBFILE" \
 		"$TERMUX_COMMON_CACHEDIR/debian-binary" \
 		"$TERMUX_PKG_PACKAGEDIR/control.tar.xz" \

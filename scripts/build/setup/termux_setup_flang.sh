@@ -2,8 +2,8 @@ termux_setup_flang() {
     if [ "$TERMUX_ON_DEVICE_BUILD" = true ]; then
 		if [[ "$TERMUX_APP_PACKAGE_MANAGER" = "apt" && "$(dpkg-query -W -f '${db:Status-Status}\n' flang 2>/dev/null)" != "installed" ]] ||
 			[[ "$TERMUX_APP_PACKAGE_MANAGER" = "pacman" && ! "$(pacman -Q flang 2>/dev/null)" ]]; then
-			echo "Package 'flang' is not installed."
-			echo "You can install it with"
+			echo "未安装 'flang' 软件包。"
+			echo "您可以通过以下方式安装："
 			echo
 			echo "  pkg install flang"
 			echo
@@ -73,7 +73,7 @@ b957bafa43b24b6a68a42ce3aac09f7be7987b8f0c732d7245f4602beb0df5dd  package-flang-
 			if [ "\$1" != "-cpp" ] && [ "\$1" != "-fc1" ]; then
 				\`dirname \$0\`/flang-new --target=${host_plat}${TERMUX_PKG_API_LEVEL} -D__ANDROID_API__=$TERMUX_PKG_API_LEVEL "\$@"
 			else
-				# Target is already an argument.
+				# 目标已经是一个参数。
 				\`dirname \$0\`/flang-new "\$@"
 			fi
 			EOF

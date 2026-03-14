@@ -12,14 +12,14 @@ termux_setup_bpc() {
 			[ "$(cat "$TERMUX_BUILT_PACKAGES_DIRECTORY/blueprint-compiler")" != "$_BPC_VERSION" ]) &&
 			([[ "$TERMUX_APP_PACKAGE_MANAGER" = "apt" && "$(dpkg-query -W -f '${db:Status-Status}\n' blueprint-compiler 2>/dev/null)" != "installed" ]] ||
 			[[ "$TERMUX_APP_PACKAGE_MANAGER" = "pacman" && ! "$(pacman -Q blueprint-compiler 2>/dev/null)" ]]); then
-			echo "Package 'blueprint-compiler' is not installed."
-			echo "You can install it with"
+			echo "未安装 'blueprint-compiler' 软件包。"
+			echo "您可以通过以下方式安装："
 			echo
 			echo "  pkg install blueprint-compiler"
 			echo
 			echo "  pacman -S blueprint-compiler"
 			echo
-			echo "or build it from source with"
+			echo "或从源代码构建："
 			echo
 			echo "  ./build-package.sh blueprint-compiler"
 			echo
@@ -41,7 +41,7 @@ termux_setup_bpc() {
 		rm -Rf "$_BPC_SRCDIR"
 		mkdir -p "$_BPC_SRCDIR/build"
 		tar -xf "$_BPC_SRCARCHIVE" --strip-components=1 -C "$_BPC_SRCDIR"
-		# termux_setup_meson for hostbuilds copied from glib package
+		# 从 glib 软件包复制的用于 hostbuilds 的 termux_setup_meson
 		AR=;CC=;CFLAGS=;CPPFLAGS=;CXX=;CXXFLAGS=;LD=;LDFLAGS=;PKG_CONFIG=;STRIP=
 		termux_setup_meson
 		unset AR CC CFLAGS CPPFLAGS CXX CXXFLAGS LD LDFLAGS PKG_CONFIG STRIP

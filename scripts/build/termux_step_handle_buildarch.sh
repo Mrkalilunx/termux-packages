@@ -1,7 +1,7 @@
 termux_step_handle_buildarch() {
 	[ "$TERMUX_ON_DEVICE_BUILD" = "true" ] && return
 
-	# If $TERMUX_PREFIX already exists, it may have been built for a different arch
+	# 如果 $TERMUX_PREFIX 已经存在，它可能是为不同的架构构建的
 	local TERMUX_ARCH_FILE=/data/TERMUX_ARCH
 	if [ -f "${TERMUX_ARCH_FILE}" ]; then
 		local TERMUX_PREVIOUS_ARCH
@@ -11,7 +11,7 @@ termux_step_handle_buildarch() {
 			mkdir -p "$TERMUX_DATA_BACKUPDIRS"
 			local TERMUX_DATA_PREVIOUS_BACKUPDIR=$TERMUX_DATA_BACKUPDIRS/$TERMUX_PREVIOUS_ARCH
 			local TERMUX_DATA_CURRENT_BACKUPDIR=$TERMUX_DATA_BACKUPDIRS/$TERMUX_ARCH
-			# Save current /data (removing old backup if any)
+			# 保存当前 /data（如果有旧备份则删除）
 			if test -e "$TERMUX_DATA_PREVIOUS_BACKUPDIR"; then
 				termux_error_exit "Directory already exists"
 			fi
@@ -22,13 +22,13 @@ termux_step_handle_buildarch() {
 					mv "${TERMUX_DATA_PREVIOUS_BACKUPDIR}/${TERMUX_APP_PACKAGE}/cgct" "/data/data/${TERMUX_APP_PACKAGE}"
 				fi
 			fi
-			# Restore new one (if any)
+			# 恢复新的（如果有）
 			if [ -d "$TERMUX_DATA_CURRENT_BACKUPDIR" ]; then
 				mv "$TERMUX_DATA_CURRENT_BACKUPDIR" /data/data
 			fi
 		fi
 	fi
 
-	# Keep track of current arch we are building for.
+	# 跟踪我们正在构建的当前架构。
 	echo "$TERMUX_ARCH" > $TERMUX_ARCH_FILE
 }

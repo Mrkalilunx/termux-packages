@@ -4,19 +4,19 @@ termux_step_cleanup_packages() {
 
 	local AVAILABLE TERMUX_PACKAGES_DIRECTORIES PKGS PKG_REGEX
 
-	# Extract available disk space in bytes
+	# 以字节为单位提取可用磁盘空间
 	AVAILABLE="$(df "$TERMUX_TOPDIR" | awk 'NR==2 {print $4 * 1024}')"
 
-	# No need to cleanup if there is enough disk space
+	# 如果有足够的磁盘空间，则无需清理
 	(( AVAILABLE <= TERMUX_CLEANUP_BUILT_PACKAGES_THRESHOLD )) || return 0
 
 	TERMUX_PACKAGES_DIRECTORIES="$(jq --raw-output 'del(.pkg_format) | keys | .[]' "${TERMUX_SCRIPTDIR}"/repo.json)"
 
-	# Build package name regex to be used with `find`, avoiding loops.
+	# 构建包名称正则表达式以与 `find` 一起使用，避免循环。
 	PKGS="$(find ${TERMUX_PACKAGES_DIRECTORIES} -mindepth 1 -maxdepth 1 -type d -printf '%f\n')"
 	[[ -z "$PKGS" ]] && return 0
 
-	# Exclude current package from the list.
+	# 从列表中排除当前包。
 	PKGS="$(printf "%s" "$PKGS" | grep -Fxv "$TERMUX_PKG_NAME")"
 	[[ -z "$PKGS" ]] && return 0
 

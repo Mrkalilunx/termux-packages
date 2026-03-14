@@ -1,4 +1,4 @@
-# Termux packages
+# Termux 包
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/termux/termux-packages)
 [![Packages last build status](https://github.com/termux/termux-packages/actions/workflows/packages.yml/badge.svg?branch=master)](https://github.com/termux/termux-packages/actions)
@@ -14,25 +14,25 @@
 
 <img src=".github/static/hosted-by-hetzner.png" alt="Hosted by Hetzner" width="128px"></img>
 
-This project contains scripts and patches to build packages for the [Termux](https://github.com/termux/termux-app)
-Android application.
+本项目包含为 [Termux](https://github.com/termux/termux-app) Android
+应用程序构建包的脚本和补丁。
 
-Quick how-to about Termux package management is available at [Package Management](https://github.com/termux/termux-packages/wiki/Package-Management). It also has info on how to fix **`repository is under maintenance or down`** errors when running `apt` or `pkg` commands.
+关于 Termux 包管理的快速说明可在 [包管理](https://github.com/termux/termux-packages/wiki/Package-Management) 中获取。它还包含如何在运行 `apt` 或 `pkg` 命令时修复 **`repository is under maintenance or down`** 错误的信息。
 
-## Contributing
+## 贡献
 
-Read [CONTRIBUTING.md](/CONTRIBUTING.md) and [Developer's Wiki](https://github.com/termux/termux-packages/wiki) for more details.
+阅读 [CONTRIBUTING.md](/CONTRIBUTING.md) 和 [开发者维基](https://github.com/termux/termux-packages/wiki) 以获取更多详细信息。
 
-## Community
+## 社区
 
-The Termux Community docs are available [here](https://github.com/termux/termux-community/blob/site/site/pages/en/index.md).
+Termux 社区文档可在[这里](https://github.com/termux/termux-community/blob/site/site/pages/en/index.md)获取。
 
-**All our community members must follow the rules that are defined [here](https://github.com/termux/termux-community/blob/site/site/pages/en/rules/index.md) and any [Content Not Allowed](https://github.com/termux/termux-community/blob/site/site/pages/en/rules/index.md#8-content-not-allowed) must not be posted.**
+**所有社区成员必须遵循[这里](https://github.com/termux/termux-community/blob/site/site/pages/en/rules/index.md)定义的规则，不得发布任何[不允许的内容](https://github.com/termux/termux-community/blob/site/site/pages/en/rules/index.md#8-content-not-allowed)。**
 ##
 
 
 
-## Sponsors and Funders
+## 赞助者和资助者
 
 [<img alt="GitHub Accelerator" width="25%" src="site/assets/sponsors/github.png" />](https://github.com)  
 *[GitHub Accelerator](https://github.com/accelerator) ([1](https://github.blog/2023-04-12-github-accelerator-our-first-cohort-and-whats-next))*
@@ -55,4 +55,4 @@ The Termux Community docs are available [here](https://github.com/termux/termux-
 &nbsp;
 
 [<img alt="Warp" width="25%" src="https://github.com/warpdotdev/brand-assets/blob/640dffd347439bbcb535321ab36b7281cf4446c0/Github/Sponsor/Warp-Github-LG-03.png" />](https://www.warp.dev/?utm_source=github&utm_medium=readme&utm_campaign=termux)  
-[*Warp, built for coding with multiple AI agents*](https://www.warp.dev/?utm_source=github&utm_medium=readme&utm_campaign=termux)
+[*Warp，专为使用多个 AI 代理编码而构建*](https://www.warp.dev/?utm_source=github&utm_medium=readme&utm_campaign=termux)

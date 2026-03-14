@@ -1,13 +1,14 @@
 # shellcheck shell=bash
 
-# The Debian `.alternatives` format is a simple ad-hoc plain text format
-# to declaratively define groups for `update-alternatives`.
-# This function parses files of this format and returns their contents
-# in the associative arrays: ${LINK[@]} ${[ALTERNATIVE@]} ${DEPENDENTS[@]} ${PRIORITY[@]}
+# Debian `.alternatives` 格式是一个简单的临时纯文本格式，
+# 用于声明性地定义 `update-alternatives` 的组。
+# 此函数解析这种格式的文件并以关联数组形式返回其内容：
+# ${LINK[@]} ${[ALTERNATIVE@]} ${DEPENDENTS[@]} ${PRIORITY[@]}
 termux_parse_alternatives() {
 	local line key value
 	local dependents=0
-	while IFS=$'\n' read -r line; do
+	while IFS=
+\n' read -r line; do
 
 		key="${line%%:*}" # Part before the first ':'
 		value="${line#*:[[:blank:]]*}" # Part after the first `:`, leading whitespace stripped
@@ -22,7 +23,8 @@ termux_parse_alternatives() {
 
 		if (( dependents )); then
 			read -r dep_link dep_name dep_alternative <<< "$line"
-			DEPENDENTS[${NAME[-1]}]+="      --slave \"${TERMUX_PREFIX}/${dep_link}\" \"${dep_name}\" \"${TERMUX_PREFIX}/${dep_alternative}\""$' \\\n'
+			DEPENDENTS[${NAME[-1]}]+="      --slave \"${TERMUX_PREFIX}/${dep_link}\" \"${dep_name}\" \"${TERMUX_PREFIX}/${dep_alternative}\""
+ \\\n'
 		fi
 
 	done < <(sed -e 's|\s*#.*$||g' "$1") # Strip out any comments
@@ -36,39 +38,41 @@ termux_step_update_alternatives() {
 		local -A DEPENDENTS=() LINK=() ALTERNATIVE=() PRIORITY=()
 		termux_parse_alternatives "$alternatives_file"
 
-		# Handle postinst script
+		# 处理 postinst 脚本
 		[[ -f postinst ]] && mv postinst{,.orig}
 
 		local name
 		for name in "${NAME[@]}"; do
-			# Not every entry will have dependents in its group
-			# but we need to initialize the keys regardless
+			# 并非每个条目在其组中都有依赖项，
+			# 但无论如何我们需要初始化键
 			: "${DEPENDENTS[$name]:=}"
 		done
 
-		{ # Splice in the alternatives
-		# Use the original shebang if there's a 'postinst.orig'
+		{ # 插入替代方案
+		# 如果有 'postinst.orig'，则使用原始的 shebang
 		[[ -f postinst.orig ]] && head -n1 postinst.orig || echo "#!${TERMUX_PREFIX}/bin/sh"
-		# Boilerplate header comment and checks
+		# 样板页眉注释和检查
 		echo "# Automatically added by termux_step_update_alternatives"
 		echo "if [ \"\$1\" = 'configure' ] || [ \"\$1\" = 'abort-upgrade' ] || [ \"\$1\" = 'abort-deconfigure' ] || [ \"\$1\" = 'abort-remove' ] || [ \"${TERMUX_PACKAGE_FORMAT}\" = 'pacman' ]; then"
 		echo "  if [ -x \"${TERMUX_PREFIX}/bin/update-alternatives\" ]; then"
-		# 'update-alternatives' command for each group
+		# 每个组的 'update-alternatives' 命令
 		for name in "${NAME[@]}"; do
-			# Main alternative group
+			# 主替代组
 			printf '%b' \
 				"    # ${name}\n" \
-				"    update-alternatives" $' \\\n' \
+				"    update-alternatives" 
+ \\\n' \
 				"      --install \"${TERMUX_PREFIX}/${LINK[$name]}\" \"${name}\" \"${TERMUX_PREFIX}/${ALTERNATIVE[$name]}\" ${PRIORITY[$name]}"
-			# If we have dependents, add those as well
+			# 如果我们有依赖项，则也添加它们
 			if [[ -n "${DEPENDENTS[$name]}" ]]; then
-				# We need to add a ' \<lf>' to the --install line,
-				# and remove the last ' \<lf>' from the dependents.
-				printf ' \\\n%s' "${DEPENDENTS[$name]%$' \\\n'}"
+				# 我们需要在 --install 行中添加一个 ' \<lf>'，
+				# 并从依赖项中删除最后一个 ' \<lf>'。
+				printf ' \\\n%s' "${DEPENDENTS[$name]%
+ \\\n'}"
 			fi
 			echo ""
 		done
-		# Close up boilerplate and add end comment
+		# 关闭样板并添加结束注释
 		echo "  fi"
 		echo "fi"
 		echo "# End automatically added section"
@@ -78,24 +82,24 @@ termux_step_update_alternatives() {
 			rm postinst.orig
 		fi
 
-		# Handle prerm script
+		# 处理 prerm 脚本
 		[[ -f prerm  ]] && mv prerm{,.orig}
 
-		{ # Splice in the alternatives
-		# Use the original shebang if there's a 'prerm.orig'
+		{ # 插入替代方案
+		# 如果有 'prerm.orig'，则使用原始的 shebang
 		[[ -f prerm.orig ]] && head -n1 prerm.orig || echo "#!${TERMUX_PREFIX}/bin/sh"
-		# Boilerplate header comment and checks
+		# 样板页眉注释和检查
 		echo "# Automatically added by termux_step_update_alternatives"
 		echo "if [ \"\$1\" = 'remove' ] || [ \"\$1\" != 'upgrade' ] || [ \"${TERMUX_PACKAGE_FORMAT}\" = 'pacman' ]; then"
 		echo "  if [ -x \"${TERMUX_PREFIX}/bin/update-alternatives\" ]; then"
-		# Remove each group
+		# 删除每个组
 		for name in "${NAME[@]}"; do
-			# Log message for this alternative group
+			# 此替代组的日志消息
 			printf 'INFO: %s\n' "${name} -> ${ALTERNATIVE[$name]} (${PRIORITY[$name]})" 1>&2
-			# Removal line
+			# 删除行
 			printf '%s\n' "    update-alternatives --remove \"${name}\" \"${TERMUX_PREFIX}/${ALTERNATIVE[$name]}\""
 		done
-		# Close up boilerplate and add end comment
+		# 关闭样板并添加结束注释
 		echo "  fi"
 		echo "fi"
 		echo "# End automatically added section"

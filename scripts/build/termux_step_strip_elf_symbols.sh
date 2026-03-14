@@ -3,7 +3,7 @@ termux_step_strip_elf_symbols() {
 }
 
 termux_step_strip_elf_symbols__from_paths() {
-	# Strip binaries. file(1) may fail for certain unusual files, so disable pipefail.
+	# 剥离二进制文件。file(1) 对于某些不寻常的文件可能会失败，因此禁用 pipefail。
 	(
 		set +e +o pipefail && \
 		find "$@" -type f -print0 | xargs -r -0 \

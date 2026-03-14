@@ -1,41 +1,41 @@
-# Security Policies and Procedures
+# 安全政策和程序
 
-The Termux team takes all security vulnerabilities seriously and we encourage external parties and users to report them. We are also a strong believer of security-through-transparency and we publicly disclose all vulnerabilities that our own team finds or are reported by others as per responsible disclosure timelines.
+Termux 团队非常重视所有安全漏洞，我们鼓励外部各方和用户报告这些问题。我们也是安全透明度的坚定信仰者，我们根据负责任的披露时间表，公开披露我们自己团队发现或由其他人报告的所有漏洞。
 
-# Reporting a Bug or Security Vulnerability
+# 报告错误或安全漏洞
 
-The Termux team and community take all security vulnerabilities seriously. We will acknowledge the report, if valid, within 3 business days.
+Termux 团队和社区非常重视所有安全漏洞。如果报告有效，我们将在 3 个工作日内确认报告。
 
-Security issues with one of termux's packages, or with termux's infrastructure, should be reported in termux/termux-packages, while security issues in the apps should be reported in [termux/termux-app](https://github.com/termux/termux-app).
+termux 包或 termux 基础设施的安全问题应在 termux/termux-packages 中报告，而应用程序中的安全问题应在 [termux/termux-app](https://github.com/termux/termux-app) 中报告。
 
-## Reporting Security Bugs via GitHub Security Advisory (Preferred)
+## 通过 GitHub 安全建议报告安全漏洞（首选）
 
-The preferred way to report security vulnerabilities is through [GitHub Security Advisories](https://github.com/advisories). This allows us to collaborate on a fix while maintaining confidentiality of the report.
+报告安全漏洞的首选方式是通过 [GitHub 安全建议](https://github.com/advisories)。这允许我们在保持报告机密性的同时协作修复漏洞。
 
-To report a vulnerability ([see also the docs](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability)):
+要报告漏洞（[另请参阅文档](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability)）：
 
-1. Visit the [Security tab](https://github.com/termux/termux-packages/security)
-2. Click Report a vulnerability and follow the provided steps.
+1. 访问[安全选项卡](https://github.com/termux/termux-packages/security)
+2. 点击报告漏洞并按照提供的步骤操作。
 
-## Reporting via Email
+## 通过电子邮件报告
 
-Send an email, preferably gpg encrypted, to the maintainers that seem to be responsible for the affected component, as per git history. You can find our public gpg keys in the [termux-keyring package](https://github.com/termux/termux-packages/tree/master/packages/termux-keyring). Please include all relevant details directly in the email, and send to multiple maintainers. We will aim at getting back within 3 business days, and provide updates on the progress and may request additional details.
+发送电子邮件（最好使用 gpg 加密）给根据 git 历史记录似乎负责受影响组件的维护者。您可以在 [termux-keyring 包](https://github.com/termux/termux-packages/tree/master/packages/termux-keyring) 中找到我们的公共 gpg 密钥。请直接在电子邮件中包含所有相关详细信息，并发送给多个维护者。我们将致力于在 3 个工作日内回复，提供进展更新，并可能要求提供更多详细信息。
 
-## Issues in packages and forks
+## 包和分叉中的问题
 
-If you have found a security issue in a package, for example openssh, and the issue can be reproduced in non-termux installations as well, then the issue should be reported to the upstream developers.
+如果您在包中发现了安全问题，例如 openssh，并且该问题也可以在非 termux 安装中重现，那么应将该问题报告给上游开发人员。
 
-If you are using a fork of termux, then we would appreciate if you could first verify that issue is reproducible in the termux version we provide as well. This can also help verify that issue does not stem from config changes.
+如果您使用的是 termux 的分叉，那么我们将很感激您首先验证该问题在我们提供的 termux 版本中是否可重现。这也有助于验证问题不是源自配置更改。
 
-# Disclosure Policy
+# 披露政策
 
-When the security team receives a security bug report, it will be assigned to a developer. This person will coordinate the fix and release process, involving the following steps:
+当安全团队收到安全错误报告时，它将被分配给一名开发人员。此人员将协调修复和发布过程，包括以下步骤：
 
-* Confirm the problem and determine affected environments.
-* Prepare fixes. The fixes will be pushed as soon as possible to the repositories.
+* 确认问题并确定受影响的环境。
+* 准备修复。修复将尽快推送到仓库。
 
-Roughly 30 days after the fixes have been made available the issue will be disclosed on github and [https://termux.dev](https://termux.dev/en/posts/index.html).
+在修复可用大约 30 天后，问题将在 github 和 [https://termux.dev](https://termux.dev/en/posts/index.html) 上披露。
 
-# Comments on this Policy
+# 对此政策的评论
 
-If you have suggestions on how this process or document could be improved please submit a pull request!
+如果您对如何改进此过程或文档有建议，请提交拉取请求！

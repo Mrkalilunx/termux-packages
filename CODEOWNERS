@@ -1,44 +1,44 @@
-# Default assignment: frequent contributors from @termux.
+# 默认分配：来自 @termux 的频繁贡献者
 * @Grimler91 @TomJo2000
 
-# GitHub Actions & other stuff
+# GitHub Actions 和其他内容
 /.github @thunder-coding
 
-# Documentation for contributors
+# 贡献者文档
 /CONTRIBUTING.md @thunder-coding
 /README.md @thunder-coding
 
-# Build system.
+# 构建系统
 /build-all.sh @Grimler91
 /build-package.sh @Grimler91 @thunder-coding
 /clean.sh @Grimler91 @thunder-coding
 /scripts/ @Grimler91 @thunder-coding
 /repo.json @Grimler91 @thunder-coding
 
-# Docker security profiles
+# Docker 安全配置文件
 /scripts/profile.json @thunder-coding @licy183
 /scripts/*.apparmor @thunder-coding
 
-# Build script linter
+# 构建脚本检查工具
 /scripts/lint-packages.sh @TomJo2000
 
-# Repository Health Check
+# 仓库健康检查
 /scripts/check-repository-health.js @thunder-coding
 /scripts/generate-apt-packages-list.sh @thunder-coding
 
-# GN setup script
+# GN 设置脚本
 /scripts/build/setup/termux_setup_gn.sh @thunder-coding
 
-# Nodejs setup script
+# Nodejs 设置脚本
 /scripts/build/setup/termux_setup_nodejs.sh @thunder-coding
 
-# Packages owned by @finagolfin
+# @finagolfin 拥有的包
 /packages/libdispatch/ @finagolfin
 /packages/libllvm/ @finagolfin
 /packages/llbuild/ @finagolfin
 /packages/swift/ @finagolfin
 
-# Packages owned by @Grimler91
+# @Grimler91 拥有的包
 /packages/chezmoi/ @Grimler91
 /packages/docopt/ @Grimler91
 /packages/libprotobuf-c/ @Grimler91
@@ -52,7 +52,7 @@
 /packages/termux-services/ @Grimler91
 /packages/texlive-bin/ @Grimler91
 
-# Packages owned by @kcubeterm
+# @kcubeterm 拥有的包
 /packages/brook/ @kcubeterm
 /packages/delve/ @kcubeterm
 /packages/duf/ @kcubeterm
@@ -73,13 +73,13 @@
 /packages/shiori/ @kcubeterm
 /packages/youtubedr/ @kcubeterm
 
-# Packages owned by @MrAdityaAlok
+# @MrAdityaAlok 拥有的包
 /packages/ghc/ @MrAdityaAlok
 /packages/cabal-install/ @MrAdityaAlok
 /packages/libdvbcsa/ @MrAdityaAlok
 /packages/tvheadend/ @MrAdityaAlok
 
-# Packages owned by @thunder-coding
+# @thunder-coding 拥有的包
 /packages/command-not-found/ @thunder-coding
 /packages/flyctl/ @thunder-coding
 /packages/git-sizer/ @thunder-coding
@@ -91,7 +91,7 @@
 /packages/silicon/ @thunder-coding
 /packages/slides/ @thunder-coding
 
-# Packages owned by @TomJo2000
+# @TomJo2000 拥有的包
 /packages/bash/ @TomJo2000
 /packages/bash-completion/ @TomJo2000
 /packages/borgbackup/ @TomJo2000
@@ -136,18 +136,18 @@
 /x11-packages/qbittorrent/ @TomJo2000
 /x11-packages/vim-gtk/ @TomJo2000
 
-# Packages owned by @2096779623
+# @2096779623 拥有的包
 /packages/openlist/ @2096779623
 /packages/frp/ @2096779623
 
-# Packages owned by @twaik
+# @twaik 拥有的包
 /x11-packages/termux-x11-nightly/ @twaik
 
-# Packages owned by @Maxython
+# @Maxython 拥有的包
 /packages/pacman/ @Maxython
 /packages/glibc-repo/ @Maxython
 
-# Packages owned by @licy183
+# @licy183 拥有的包
 /packages/deno/ @licy183
 /packages/llvm-mingw-w64/ @licy183
 /packages/llvm-mingw-w64-libcompiler-rt/ @licy183

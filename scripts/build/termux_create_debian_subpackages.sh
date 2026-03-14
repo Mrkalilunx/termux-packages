@@ -1,17 +1,17 @@
 termux_create_debian_subpackages() {
-	# Sub packages:
+	# 子包：
 	local _ADD_PREFIX=""
 	if [[ "$TERMUX_PACKAGE_LIBRARY" == 'glibc' ]]; then
 		_ADD_PREFIX="glibc/"
 	fi
 	if [[ "$TERMUX_PKG_NO_STATICSPLIT" == 'false' && -n "$(shopt -s globstar; shopt -s nullglob; echo ${_ADD_PREFIX}lib{,32}/**/*.a)" ]]; then
-		# Add virtual -static sub package if there are include files:
+		# 如果有包含文件，则添加虚拟 -static 子包：
 		local _STATIC_SUBPACKAGE_FILE=$TERMUX_PKG_TMPDIR/${TERMUX_PKG_NAME}-static.subpackage.sh
 		echo TERMUX_SUBPKG_INCLUDE=\"$(find ${_ADD_PREFIX}lib{,32} -name '*.a' -o -name '*.la' 2> /dev/null) $TERMUX_PKG_STATICSPLIT_EXTRA_PATTERNS\" > "$_STATIC_SUBPACKAGE_FILE"
 		echo "TERMUX_SUBPKG_DESCRIPTION=\"Static libraries for ${TERMUX_PKG_NAME}\"" >> "$_STATIC_SUBPACKAGE_FILE"
 	fi
 
-	# Now build all sub packages
+	# 现在构建所有子包
 	rm -Rf "$TERMUX_TOPDIR/$TERMUX_PKG_NAME/subpackages"
 	for subpackage in $TERMUX_PKG_BUILDER_DIR/*.subpackage.sh $TERMUX_PKG_TMPDIR/*subpackage.sh; do
 		[[ -f "$subpackage" ]] || continue
@@ -46,16 +46,16 @@ termux_create_debian_subpackages() {
 		# shellcheck source=/dev/null
 		source "$subpackage"
 
-		# Do not create subpackage for specific arches.
-		# Using TERMUX_ARCH instead of SUB_PKG_ARCH (defined below) is intentional.
+		# 不为特定架构创建子包。
+		# 使用 TERMUX_ARCH 而不是 SUB_PKG_ARCH（在下面定义）是有意的。
 		if [[ " ${TERMUX_SUBPKG_EXCLUDED_ARCHES//,/ } " == *" ${TERMUX_ARCH} "* ]]; then
 			echo "Skipping creating subpackage '$SUB_PKG_NAME' for arch $TERMUX_ARCH"
 			continue
 		fi
 
-		# Allow globstar (i.e. './**/') patterns.
+		# 允许 globstar（即 './**/'）模式。
 		shopt -s globstar
-		# Allow negation patterns.
+		# 允许否定模式。
 		shopt -s extglob
 		for includeset in $TERMUX_SUBPKG_INCLUDE; do
 			local _INCLUDE_DIRSET
@@ -63,7 +63,7 @@ termux_create_debian_subpackages() {
 			[[ "$_INCLUDE_DIRSET" == "." ]] && _INCLUDE_DIRSET=""
 
 			if [[ -e "$includeset" || -L "$includeset" ]]; then
-				# Add the -L clause to handle relative symbolic links:
+				# 添加 -L 子句以处理相对符号链接：
 				mkdir -p "$SUB_PKG_MASSAGE_DIR/$_INCLUDE_DIRSET"
 				mv "$includeset" "$SUB_PKG_MASSAGE_DIR/$_INCLUDE_DIRSET"
 			else
@@ -76,7 +76,7 @@ termux_create_debian_subpackages() {
 		[[ "$TERMUX_SUBPKG_PLATFORM_INDEPENDENT" == "true" ]] && SUB_PKG_ARCH=all
 
 		cd "$SUB_PKG_DIR/massage"
-		# Check that files were actually installed, else don't subpackage.
+		# 检查文件是否实际已安装，否则不进行子包化。
 		if [[ "$SUB_PKG_ARCH" == "all" && "$(find . -type f -print | head -n1)" == "" ]]; then
 			echo "No files in subpackage '$SUB_PKG_NAME' when built for $SUB_PKG_ARCH with package '$TERMUX_PKG_NAME', so"
 			echo "the subpackage was not created. If unexpected, check to make sure the files are where you expect."
@@ -137,11 +137,11 @@ termux_create_debian_subpackages() {
 
 		for f in $TERMUX_SUBPKG_CONFFILES; do echo "$TERMUX_PREFIX_CLASSICAL/$f" >> conffiles; done
 
-		# Allow packages to create arbitrary control files.
+		# 允许包创建任意控制文件。
 		termux_step_create_subpkg_debscripts
 		termux_step_create_python_debscripts
 
-		# Create control.tar.xz
+		# 创建 control.tar.xz
 		tar --sort=name \
 			--mtime="@${SOURCE_DATE_EPOCH}" \
 			--owner=0 --group=0 --numeric-owner \
@@ -152,10 +152,11 @@ termux_create_debian_subpackages() {
 		[[ -f "$TERMUX_COMMON_CACHEDIR/debian-binary" ]] || echo "2.0" > "$TERMUX_COMMON_CACHEDIR/debian-binary"
 		${AR-ar} cr "$TERMUX_SUBPKG_DEBFILE" \
 				   "$TERMUX_COMMON_CACHEDIR/debian-binary" \
-				   "$SUB_PKG_PACKAGE_DIR/control.tar.xz" \
-				   "$SUB_PKG_PACKAGE_DIR/data.tar.xz"
+					   "$SUB_PKG_PACKAGE_DIR/control.tar.xz" \
+					   "$SUB_PKG_PACKAGE_DIR/data.tar.xz"
 
-		# Go back to main package:
+		# 返回主包：
 		cd "$TERMUX_PKG_MASSAGEDIR/$TERMUX_PREFIX_CLASSICAL"
 	done
 }
+

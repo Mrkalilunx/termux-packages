@@ -1,6 +1,6 @@
 # shellcheck shell=bash
-# Utility script to setup jailbreak-cabal script. It is used by haskell build system to remove version
-# constraints in cabal files.
+# 用于设置 jailbreak-cabal 脚本的实用脚本。它被 haskell 构建系统使用，
+# 用于删除 cabal 文件中的版本约束。
 termux_setup_jailbreak_cabal() {
 	if [[ "${TERMUX_ON_DEVICE_BUILD}" == "false" ]]; then
 		local TERMUX_JAILBREAK_VERSION=1.3.5
@@ -28,7 +28,7 @@ termux_setup_jailbreak_cabal() {
 	else
 		if [[ "${TERMUX_APP_PACKAGE_MANAGER}" == "apt" ]] && "$(dpkg-query -W -f '${db:Status-Status}\n' jailbreak-cabal 2>/dev/null)" != "installed" ||
 			[[ "${TERMUX_APP_PACKAGE_MANAGER}" = "pacman" ]] && ! "$(pacman -Q jailbreak-cabal 2>/dev/null)"; then
-			echo "Package 'jailbreak-cabal' is not installed."
+			echo "未安装 'jailbreak-cabal' 软件包。"
 			exit 1
 		fi
 	fi

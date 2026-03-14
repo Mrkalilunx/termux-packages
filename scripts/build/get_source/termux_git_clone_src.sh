@@ -6,13 +6,13 @@ termux_git_clone_src() {
 	local termux_pkg_branch_flags=""
 
 	if [[ "$termux_pkg_srcurl" =~ ^file://(/[^/]+)+$ ]]; then
-		termux_pkg_local_srcpath="${termux_pkg_srcurl:7}" # Remove `file://` prefix
+		termux_pkg_local_srcpath="${termux_pkg_srcurl:7}" # 移除 `file://` 前缀
 
 		if [ ! -d "$termux_pkg_local_srcpath" ]; then
-			echo "No source directory found at path of TERMUX_PKG_SRCURL '$TERMUX_PKG_SRCURL' of package '$TERMUX_PKG_NAME'"
+			echo "在包 '$TERMUX_PKG_NAME' 的 TERMUX_PKG_SRCURL 路径 '$TERMUX_PKG_SRCURL' 处未找到源码目录"
 			return 1
 		elif [ ! -d "$termux_pkg_local_srcpath/.git" ]; then
-			echo "The source directory at path of TERMUX_PKG_SRCURL '$TERMUX_PKG_SRCURL' of package '$TERMUX_PKG_NAME' does not a contain a '.git' sub directory"
+			echo "包 '$TERMUX_PKG_NAME' 的 TERMUX_PKG_SRCURL 路径 '$TERMUX_PKG_SRCURL' 处的源码目录不包含 '.git' 子目录"
 			return 1
 		fi
 	fi
@@ -20,13 +20,13 @@ termux_git_clone_src() {
 	if [ ! -f $TMP_CHECKOUT_VERSION ] || [ "$(cat $TMP_CHECKOUT_VERSION)" != "$TERMUX_PKG_VERSION" ]; then
 		if [[ -n "$termux_pkg_local_srcpath" ]]; then
 			if [ "$TERMUX_PKG_GIT_BRANCH" != "" ]; then
-				# The local git repository that needs to be cloned may
-				# not have a branch created that is tracking its remote
-				# branch, so we create it if it doesn't exist without
-				# checking it out, otherwise when we clone below,
-				# git will fail to find the branch in its own origin
-				# i.e the local git repository, as it will not look
-				# into the origin of the local git repository recursively.
+				# 需要克隆的本地 git 仓库可能
+				# 没有创建跟踪其远程分支的分支，
+				# 因此如果不存在则创建它，而不
+				# 进行检出，否则当我们下面克隆时，
+				# git 将无法在其自己的 origin 中找到该分支
+				# 即本地 git 仓库，因为它不会
+				# 递归地查看本地 git 仓库的 origin。
 				(cd "$termux_pkg_local_srcpath" && git fetch origin $TERMUX_PKG_GIT_BRANCH:$TERMUX_PKG_GIT_BRANCH)
 				termux_pkg_branch_flags="--branch $TERMUX_PKG_GIT_BRANCH"
 			fi
@@ -38,7 +38,7 @@ termux_git_clone_src() {
 			fi
 		fi
 
-		echo "Downloading git source $([[ "$termux_pkg_branch_flags" != "" ]] && echo "with branch '${termux_pkg_branch_flags:9}' ")from '$termux_pkg_srcurl'"
+		echo "正在从 '$termux_pkg_srcurl' 下载 git 源码 $([[ "$termux_pkg_branch_flags" != "" ]] && echo "（分支 '${termux_pkg_branch_flags:9}'）")"
 
 		rm -rf "$TMP_CHECKOUT"
 		git clone \
@@ -49,20 +49,20 @@ termux_git_clone_src() {
 
 		pushd "$TMP_CHECKOUT"
 
-		# Workaround some bad server behaviour
-		# error: Server does not allow request for unadvertised object commit_no
-		# fatal: Fetched in submodule 'submodule_path', but it did not contain commit_no. Direct fetching of that commit failed.
+		# 解决某些服务器的不良行为
+		# 错误：服务器不允许请求未公开的对象 commit_no
+		# 致命错误：在子模块 'submodule_path' 中获取，但它不包含 commit_no。直接获取该提交失败。
 		if ! git submodule update --init --recursive --depth=1; then
 			local depth=10
 			local maxdepth=100
 			sleep 1
 			while :; do
-				echo "WARN: Retrying with max depth $depth"
+				echo "警告：正在以最大深度 $depth 重试"
 				if git submodule update --init --recursive --depth=$depth; then
 					break
 				fi
 				if [[ "$depth" -gt "$maxdepth" ]]; then
-					termux_error_exit "Failed to clone submodule"
+					termux_error_exit "克隆子模块失败"
 				fi
 				depth=$((depth+10))
 				sleep 1
@@ -73,7 +73,7 @@ termux_git_clone_src() {
 
 		echo "$TERMUX_PKG_VERSION" > "$TMP_CHECKOUT_VERSION"
 	else
-		echo "Skipped downloading of git source from '$termux_pkg_srcurl'"
+		echo "已跳过从 '$termux_pkg_srcurl' 下载 git 源码"
 	fi
 
 	rm -rf "$TERMUX_PKG_SRCDIR"

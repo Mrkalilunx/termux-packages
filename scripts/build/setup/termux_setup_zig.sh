@@ -44,8 +44,8 @@ termux_setup_zig() {
 	if [[ "${TERMUX_ON_DEVICE_BUILD}" == "true" ]]; then
 		if [[ -z "$(command -v zig)" ]]; then
 			cat <<- EOL
-			Package 'zig' is not installed.
-			You can install it with
+			未安装 'zig' 软件包。
+			您可以通过以下方式安装：
 
 			pkg install zig
 			EOL
@@ -54,7 +54,7 @@ termux_setup_zig() {
 		local ZIG_VERSION=$(zig version)
 		if [[ "${TERMUX_ZIG_VERSION}" != "${ZIG_VERSION}" ]]; then
 			cat <<- EOL >&2
-			WARN: On device build with old zig version is not possible!
+			警告：在设备上使用旧版本的 zig 构建是不可能的！
 			TERMUX_ZIG_VERSION = ${TERMUX_ZIG_VERSION}
 			ZIG_VERSION        = ${ZIG_VERSION}
 			EOL
@@ -68,7 +68,7 @@ termux_setup_zig() {
 		tar -xf "${ZIG_TXZ_FILE}" -C "${ZIG_FOLDER}" --strip-components=1
 
 		if [[ -n "$(find "${TERMUX_SCRIPTDIR}/packages/zig/${TERMUX_ZIG_VERSION}" -name 'zig-*.patch')" ]]; then
-			echo "termux_setup_zig: Applying patches from packages/zig/${TERMUX_ZIG_VERSION}"
+			echo "termux_setup_zig: 正在应用 packages/zig/${TERMUX_ZIG_VERSION} 的补丁"
 			local p
 			for p in "${TERMUX_SCRIPTDIR}"/packages/zig/${TERMUX_ZIG_VERSION}/zig-*.patch; do
 				patch -d "${ZIG_FOLDER}" -p2 -i "${p}"

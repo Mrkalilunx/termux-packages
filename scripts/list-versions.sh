@@ -3,7 +3,7 @@
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 . "$SCRIPT_DIR"/properties.sh
 
-check_package() { # path
+check_package() { # 路径
 	local path=$1
 	local pkg=$(basename "$path")
 	TERMUX_PKG_REVISION=0

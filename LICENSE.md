@@ -1,12 +1,11 @@
-# License for package patches
+# 包补丁的许可证
 
-The scripts and patches to build each package is licensed under the same
-license as the actual package (so the patches and scripts to build bash are
-licensed under the same license as bash, while the patches and scripts to build
-python are licensed under the same license as python).
+用于构建每个包的脚本和补丁与实际包使用相同的许可证
+（因此用于构建 bash 的补丁和脚本与 bash 使用相同的许可证，
+而用于构建 python 的补丁和脚本与 python 使用相同的许可证）。
 
-# License for the build infrastructure
+# 构建基础设施的许可证
 
-For build infrastructure outside the `packages/`, `x11-packages/`,
-`root-packages/`, and `disabled-packages/` folders the license is
-[Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+对于 `packages/`、`x11-packages/`、`root-packages/` 和 `disabled-packages/`
+文件夹之外的构建基础设施，许可证为
+[Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0)。

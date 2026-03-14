@@ -8,13 +8,13 @@ def get_pkg_hash_from_Packages(Packages_file, package, version, hash_type="SHA25
     for pkg in package_list:
         if pkg.split('\n')[0] == "Package: "+package:
             for line in pkg.split('\n'):
-                # Assuming Filename: comes before Version:
+                # 假设 Filename: 出现在 Version: 之前
                 if line.startswith('Filename:'):
                     print(line.split(" ")[1] + " ")
                 elif line.startswith('Version:'):
                     if os.getenv('TERMUX_WITHOUT_DEPVERSION_BINDING') != 'true' and line != 'Version: '+version:
-                        # Seems the repo contains the wrong version, or several versions
-                        # We can't use this one so continue looking
+                        # 似乎仓库包含错误的版本或多个版本
+                        # 我们不能使用这个版本，所以继续查找
                         break
                 elif line.startswith(hash_type):
                     print(line.split(" ")[1])
@@ -37,11 +37,11 @@ def get_Packages_hash_from_Release(Release_file, arch, component, hash_type="SHA
 
 if __name__ == '__main__':
     if len(sys.argv) < 4:
-        sys.exit('Too few arguments, I need the path to a Packages file, a package name and a version, or an InRelease file, an architecture and a component name. Exiting')
+        sys.exit('参数太少，我需要一个 Packages 文件的路径、一个包名称和一个版本，或者一个 InRelease 文件、一个架构和一个组件名称。正在退出')
 
     if sys.argv[1].endswith('Packages'):
         get_pkg_hash_from_Packages(sys.argv[1], sys.argv[2], sys.argv[3])
     elif sys.argv[1].endswith(('InRelease', 'Release')):
         get_Packages_hash_from_Release(sys.argv[1], sys.argv[2], sys.argv[3])
     else:
-        sys.exit(sys.argv[1]+' does not seem to be a path to a Packages or InRelease/Release file')
+        sys.exit(sys.argv[1]+' 似乎不是 Packages 或 InRelease/Release 文件的路径')

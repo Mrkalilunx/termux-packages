@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ##
-##  Script for generating bootstrap archives.
+##  用于生成 bootstrap 归档文件的脚本。
 ##
 
 set -e
@@ -10,67 +10,63 @@ export TERMUX_SCRIPTDIR=$(realpath "$(dirname "$(realpath "$0")")/../")
 BOOTSTRAP_TMPDIR=$(mktemp -d "${TMPDIR:-/tmp}/bootstrap-tmp.XXXXXXXX")
 trap 'rm -rf $BOOTSTRAP_TMPDIR' EXIT
 
-# By default, bootstrap archives are compatible with Android >=7.0
-# and <10.
+# 默认情况下，bootstrap 归档文件兼容 Android >=7.0
+# 和 <10。
 BOOTSTRAP_ANDROID10_COMPATIBLE=false
 
-# By default, bootstrap archives will be built for all architectures
-# supported by Termux application.
-# Override with option '--architectures'.
+# 默认情况下，将为 Termux 应用支持的所有架构
+# 构建 bootstrap 归档文件。
+# 可使用选项 '--architectures' 覆盖。
 TERMUX_ARCHITECTURES=("aarch64" "arm" "i686" "x86_64")
 
-# The supported termux package managers.
+# 支持的 termux 包管理器。
 TERMUX_PACKAGE_MANAGERS=("apt" "pacman")
 
-# The repository base urls mapping for package managers.
+# 包管理器的仓库基础 URL 映射。
 declare -A REPO_BASE_URLS=(
 	["apt"]="https://packages-cf.termux.dev/apt/termux-main"
 	["pacman"]="https://service.termux-pacman.dev/main"
 )
 
-# The package manager that will be installed in bootstrap.
-# The default is 'apt'. Can be changed by using the '--pm' option.
+# 将在 bootstrap 中安装的包管理器。
+# 默认为 'apt'。可以使用 '--pm' 选项更改。
 TERMUX_PACKAGE_MANAGER="apt"
 
-# The repository base url for package manager.
-# Can be changed by using the '--repository' option.
+# 包管理器的仓库基础 URL。
+# 可以使用 '--repository' 选项更改。
 REPO_BASE_URL="${REPO_BASE_URLS[${TERMUX_PACKAGE_MANAGER}]}"
 
-# A list of non-essential packages. By default it is empty, but can
-# be filled with option '--add'.
+# 非必要包列表。默认为空，但可以使用选项 '--add' 填充。
 declare -a ADDITIONAL_PACKAGES
 
-# Check for some important utilities that may not be available for
-# some reason.
+# 检查某些可能因某种原因不可用的重要工具。
 for cmd in ar awk curl grep gzip find sed tar xargs xz zip jq; do
 	if [ -z "$(command -v $cmd)" ]; then
-		echo "[!] Utility '$cmd' is not available in PATH."
+		echo "[!] 工具 '$cmd' 在 PATH 中不可用。"
 		exit 1
 	fi
 done
 
-# Download package lists from remote repository.
-# Actually, there 2 lists can be downloaded: one architecture-independent and
-# one for architecture specified as '$1' argument. That depends on repository.
-# If repository has been created using "aptly", then architecture-independent
-# list is not available.
+# 从远程仓库下载包列表。
+# 实际上，可以下载 2 个列表：一个与架构无关，一个用于指定为 '$1' 参数的架构。这取决于仓库。
+# 如果仓库是使用 "aptly" 创建的，则与架构无关的列表不可用。
 read_package_list_deb() {
 	local architecture
 	for architecture in all "$1"; do
 		if [ ! -e "${BOOTSTRAP_TMPDIR}/packages.${architecture}" ]; then
-			echo "[*] Downloading package list for architecture '${architecture}'..."
+			echo "[*] 正在下载架构 '${architecture}' 的包列表..."
 			if ! curl --fail --location \
 				--output "${BOOTSTRAP_TMPDIR}/packages.${architecture}" \
 				"${REPO_BASE_URL}/dists/stable/main/binary-${architecture}/Packages"; then
 				if [ "$architecture" = "all" ]; then
-					echo "[!] Skipping architecture-independent package list as not available..."
+					echo "[!] 由于不可用，跳过与架构无关的包列表..."
 					continue
 				fi
 			fi
 			echo >> "${BOOTSTRAP_TMPDIR}/packages.${architecture}"
 		fi
 
-		echo "[*] Reading package list for '${architecture}'..."
+		echo "[*] 正在读取 '${architecture}' 的包列表..."
 		while read -r -d $'\xFF' package; do
 			if [ -n "$package" ]; then
 				local package_name
@@ -83,8 +79,7 @@ read_package_list_deb() {
 					cur_package_ver=$(echo "$package" | grep -i "^Version:" | awk '{ print $2 }')
 					prev_package_ver=$(echo "${PACKAGE_METADATA["$package_name"]}" | grep -i "^Version:" | awk '{ print $2 }')
 
-					# If package has multiple versions, make sure that our metadata
-					# contains the latest one.
+					# 如果包有多个版本，请确保我们的元数据包含最新的版本。
 					if [ "$(echo -e "${prev_package_ver}\n${cur_package_ver}" | sort -rV | head -n1)" = "${cur_package_ver}" ]; then
 						PACKAGE_METADATA["$package_name"]="$package"
 					fi
@@ -96,7 +91,7 @@ read_package_list_deb() {
 
 download_db_packages_pac() {
 	if [ ! -e "${PATH_DB_PACKAGES}" ]; then
-		echo "[*] Downloading package list for architecture '${package_arch}'..."
+		echo "[*] 正在下载架构 '${package_arch}' 的包列表..."
 		curl --fail --location \
 			--output "${PATH_DB_PACKAGES}" \
 			"${REPO_BASE_URL}/${package_arch}/main.json"
@@ -111,8 +106,8 @@ print_desc_package_pac() {
 	echo -e "%${1}%\n${2}\n"
 }
 
-# Download specified package, its dependencies and then extract *.deb or *.pkg.tar.xz files to
-# the bootstrap root.
+# 下载指定的包及其依赖项，然后将 *.deb 或 *.pkg.tar.xz 文件提取到
+# bootstrap 根目录。
 pull_package() {
 	local package_name=$1
 	local package_tmpdir="${BOOTSTRAP_PKGDIR}/${package_name}"
@@ -122,7 +117,7 @@ pull_package() {
 		local package_url
 		package_url="$REPO_BASE_URL/$(echo "${PACKAGE_METADATA[${package_name}]}" | grep -i "^Filename:" | awk '{ print $2 }')"
 		if [ "${package_url}" = "$REPO_BASE_URL" ] || [ "${package_url}" = "${REPO_BASE_URL}/" ]; then
-			echo "[!] Failed to determine URL for package '$package_name'."
+			echo "[!] 无法确定包 '$package_name' 的 URL。"
 			exit 1
 		fi
 
@@ -133,7 +128,7 @@ pull_package() {
 			done < <(echo "${PACKAGE_METADATA[${package_name}]}" | grep -i "^Depends:" | sed -E 's@^[Dd]epends:@@' | tr ',' '\n')
 		)
 
-		# Recursively handle dependencies.
+		# 递归处理依赖项。
 		if [ -n "$package_dependencies" ]; then
 			local dep
 			for dep in $package_dependencies; do
@@ -145,45 +140,45 @@ pull_package() {
 		fi
 
 		if [ ! -e "$package_tmpdir/package.deb" ]; then
-			echo "[*] Downloading '$package_name'..."
+			echo "[*] 正在下载 '$package_name'..."
 			curl --fail --location --output "$package_tmpdir/package.deb" "$package_url"
 
-			echo "[*] Extracting '$package_name'..."
+			echo "[*] 正在提取 '$package_name'..."
 			(cd "$package_tmpdir"
 				ar x package.deb
 
-				# data.tar may have extension different from .xz
+				# data.tar 可能具有不同于 .xz 的扩展名
 				if [ -f "./data.tar.xz" ]; then
 					data_archive="data.tar.xz"
 				elif [ -f "./data.tar.gz" ]; then
 					data_archive="data.tar.gz"
 				else
-					echo "No data.tar.* found in '$package_name'."
+					echo "在 '$package_name' 中未找到 data.tar.*。"
 					exit 1
 				fi
 
-				# Do same for control.tar.
+				# 对 control.tar 执行相同操作。
 				if [ -f "./control.tar.xz" ]; then
 					control_archive="control.tar.xz"
 				elif [ -f "./control.tar.gz" ]; then
 					control_archive="control.tar.gz"
 				else
-					echo "No control.tar.* found in '$package_name'."
+					echo "在 '$package_name' 中未找到 control.tar.*。"
 					exit 1
 				fi
 
-				# Extract files.
+				# 提取文件。
 				tar xf "$data_archive" -C "$BOOTSTRAP_ROOTFS"
 
 				if ! ${BOOTSTRAP_ANDROID10_COMPATIBLE}; then
-					# Register extracted files.
+					# 注册提取的文件。
 					tar tf "$data_archive" | sed -E -e 's@^\./@/@' -e 's@^/$@/.@' -e 's@^([^./])@/\1@' > "${BOOTSTRAP_ROOTFS}/${TERMUX_PREFIX}/var/lib/dpkg/info/${package_name}.list"
 
-					# Generate checksums (md5).
+					# 生成校验和（md5）。
 					tar xf "$data_archive"
 					find data -type f -print0 | xargs -0 -r md5sum | sed 's@^\.$@@g' > "${BOOTSTRAP_ROOTFS}/${TERMUX_PREFIX}/var/lib/dpkg/info/${package_name}.md5sums"
 
-					# Extract metadata.
+					# 提取元数据。
 					tar xf "$control_archive"
 					{
 						cat control
@@ -191,7 +186,7 @@ pull_package() {
 						echo
 					} >> "${BOOTSTRAP_ROOTFS}/${TERMUX_PREFIX}/var/lib/dpkg/status"
 
-					# Additional data: conffiles & scripts
+					# 附加数据：conffiles 和脚本
 					for file in conffiles postinst postrm preinst prerm; do
 						if [ -f "${PWD}/${file}" ]; then
 							cp "$file" "${BOOTSTRAP_ROOTFS}/${TERMUX_PREFIX}/var/lib/dpkg/info/${package_name}.${file}"
@@ -214,11 +209,11 @@ pull_package() {
 		fi
 
 		if [ ! -e "$package_tmpdir/package.pkg.tar.xz" ]; then
-			echo "[*] Downloading '$package_name'..."
+			echo "[*] 正在下载 '$package_name'..."
 			local package_filename=$(read_db_packages_pac "FILENAME")
 			curl --fail --location --output "$package_tmpdir/package.pkg.tar.xz" "${REPO_BASE_URL}/${package_arch}/${package_filename}"
 
-			echo "[*] Extracting '$package_name'..."
+			echo "[*] 正在提取 '$package_name'..."
 			(cd "$package_tmpdir"
 				local package_desc="${package_name}-$(read_db_packages_pac VERSION)"
 				mkdir -p "${BOOTSTRAP_ROOTFS}/${TERMUX_PREFIX}/var/lib/pacman/local/${package_desc}"
@@ -245,12 +240,12 @@ pull_package() {
 	fi
 }
 
-# Add termux bootstrap second stage files
+# 添加 termux bootstrap 第二阶段文件
 add_termux_bootstrap_second_stage_files() {
 
 	local package_arch="$1"
 
-	echo "[*] Adding termux bootstrap second stage files..."
+	echo "[*] 正在添加 termux bootstrap 第二阶段文件..."
 
 	mkdir -p "${BOOTSTRAP_ROOTFS}/${TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_DIR}"
 	sed -e "s|@TERMUX_PREFIX@|${TERMUX_PREFIX}|g" \
@@ -264,7 +259,7 @@ add_termux_bootstrap_second_stage_files() {
 		> "${BOOTSTRAP_ROOTFS}/${TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_DIR}/$TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE"
 	chmod 700 "${BOOTSTRAP_ROOTFS}/${TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_DIR}/$TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE"
 
-	# TODO: Remove it when Termux app supports `pacman` bootstraps installation.
+	# TODO: 当 Termux 应用支持 `pacman` bootstraps 安装时删除它。
 	sed -e "s|@TERMUX_PREFIX@|${TERMUX_PREFIX}|g" \
 		-e "s|@TERMUX__PREFIX__PROFILE_D_DIR@|${TERMUX__PREFIX__PROFILE_D_DIR}|g" \
 		-e "s|@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_DIR@|${TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_DIR}|g" \
@@ -275,14 +270,14 @@ add_termux_bootstrap_second_stage_files() {
 
 }
 
-# Final stage: generate bootstrap archive and place it to current
-# working directory.
-# Information about symlinks is stored in file SYMLINKS.txt.
+# 最后阶段：生成 bootstrap 归档文件并将其放置到当前
+# 工作目录。
+# 符号链接的信息存储在 SYMLINKS.txt 文件中。
 create_bootstrap_archive() {
-	echo "[*] Creating 'bootstrap-${1}.zip'..."
+	echo "[*] 正在创建 'bootstrap-${1}.zip'..."
 	(cd "${BOOTSTRAP_ROOTFS}/${TERMUX_PREFIX}"
-		# Do not store symlinks in bootstrap archive.
-		# Instead, put all information to SYMLINKS.txt
+		# 不要在 bootstrap 归档文件中存储符号链接。
+		# 相反，将所有信息放入 SYMLINKS.txt
 		while read -r -d '' link; do
 			echo "$(readlink "$link")←${link}" >> SYMLINKS.txt
 			rm -f "$link"
@@ -292,43 +287,43 @@ create_bootstrap_archive() {
 	)
 
 	mv -f "${BOOTSTRAP_TMPDIR}/bootstrap-${1}.zip" ./
-	echo "[*] Finished successfully (${1})."
+	echo "[*] 成功完成（${1}）。"
 }
 
 show_usage() {
 	echo
-	echo "Usage: generate-bootstraps.sh [options]"
+	echo "用法：generate-bootstraps.sh [选项]"
 	echo
-	echo "Generate bootstrap archives for Termux application."
+	echo "为 Termux 应用生成 bootstrap 归档文件。"
 	echo
-	echo "Options:"
+	echo "选项："
 	echo
-	echo " -h, --help                  Show this help."
+	echo " -h, --help                  显示此帮助。"
 	echo
-	echo " --android10                 Generate bootstrap archives for Android 10."
+	echo " --android10                 为 Android 10 生成 bootstrap 归档文件。"
 	echo
-	echo " -a, --add PKG_LIST          Specify one or more additional packages"
-	echo "                             to include into bootstrap archive."
-	echo "                             Multiple packages should be passed as"
-	echo "                             comma-separated list."
+	echo " -a, --add PKG_LIST          指定一个或多个附加包"
+	echo "                             包含到 bootstrap 归档文件中。"
+	echo "                             多个包应以"
+	echo "                             逗号分隔的列表形式传递。"
 	echo
-	echo " --pm MANAGER                Set up a package manager in bootstrap."
-	echo "                             It can only be pacman or apt (the default is apt)."
+	echo " --pm MANAGER                在 bootstrap 中设置包管理器。"
+	echo "                             它只能是 pacman 或 apt（默认为 apt）。"
 	echo
-	echo " --architectures ARCH_LIST   Override default list of architectures"
-	echo "                             for which bootstrap archives will be"
-	echo "                             created."
-	echo "                             Multiple architectures should be passed"
-	echo "                             as comma-separated list."
+	echo " --architectures ARCH_LIST   覆盖要为其"
+	echo "                             创建 bootstrap 归档文件的"
+	echo "                             默认架构列表。"
+	echo "                             多个架构应以"
+	echo "                             逗号分隔的列表形式传递。"
 	echo
-	echo " -r, --repository URL        Specify URL for APT repository from"
-	echo "                             which packages will be downloaded."
-	echo "                             This must be passed after '--pm' option."
+	echo " -r, --repository URL        指定 APT 仓库的 URL，"
+	echo "                             将从该仓库下载包。"
+	echo "                             必须在 '--pm' 选项之后传递。"
 	echo
-	echo "Architectures: ${TERMUX_ARCHITECTURES[*]}"
-	echo "Repository Base Url: ${REPO_BASE_URL}"
-	echo "Prefix: ${TERMUX_PREFIX}"
-        echo "Package manager: ${TERMUX_PACKAGE_MANAGER}"
+	echo "架构：${TERMUX_ARCHITECTURES[*]}"
+	echo "仓库基础 URL：${REPO_BASE_URL}"
+	echo "前缀：${TERMUX_PREFIX}"
+        echo "包管理器：${TERMUX_PACKAGE_MANAGER}"
 	echo
 }
 
@@ -349,7 +344,7 @@ while (($# > 0)); do
 				unset pkg
 				shift 1
 			else
-				echo "[!] Option '--add' requires an argument."
+				echo "[!] 选项 '--add' 需要一个参数。"
 				show_usage
 				exit 1
 			fi
@@ -360,7 +355,7 @@ while (($# > 0)); do
 				REPO_BASE_URL="${REPO_BASE_URLS[${TERMUX_PACKAGE_MANAGER}]}"
 				shift 1
 			else
-				echo "[!] Option '--pm' requires an argument." 1>&2
+				echo "[!] 选项 '--pm' 需要一个参数。" 1>&2
 				show_usage
 				exit 1
 			fi
@@ -374,7 +369,7 @@ while (($# > 0)); do
 				unset arch
 				shift 1
 			else
-				echo "[!] Option '--architectures' requires an argument."
+				echo "[!] 选项 '--architectures' 需要一个参数。"
 				show_usage
 				exit 1
 			fi
@@ -384,13 +379,13 @@ while (($# > 0)); do
 				REPO_BASE_URL="$2"
 				shift 1
 			else
-				echo "[!] Option '--repository' requires an argument."
+				echo "[!] 选项 '--repository' 需要一个参数。"
 				show_usage
 				exit 1
 			fi
 			;;
 		*)
-			echo "[!] Got unknown option '$1'"
+			echo "[!] 收到未知选项 '$1'"
 			show_usage
 			exit 1
 			;;
@@ -399,13 +394,13 @@ while (($# > 0)); do
 done
 
 if [[ "$TERMUX_PACKAGE_MANAGER" == *" "* ]] || [[ " ${TERMUX_PACKAGE_MANAGERS[*]} " != *" $TERMUX_PACKAGE_MANAGER "* ]]; then
-	echo "[!] Invalid package manager '$TERMUX_PACKAGE_MANAGER'" 1>&2
-	echo "Supported package managers: '${TERMUX_PACKAGE_MANAGERS[*]}'" 1>&2
+	echo "[!] 无效的包管理器 '$TERMUX_PACKAGE_MANAGER'" 1>&2
+	echo "支持的包管理器：'${TERMUX_PACKAGE_MANAGERS[*]}'" 1>&2
 	exit 1
 fi
 
 if [ -z "$REPO_BASE_URL" ]; then
-	echo "[!] The repository base url is not set." 1>&2
+	echo "[!] 仓库基础 URL 未设置。" 1>&2
 	exit 1
 fi
 

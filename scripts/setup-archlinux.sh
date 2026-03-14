@@ -3,48 +3,48 @@ set -e -u
 
 PACKAGES=""
 PACKAGES+=" asciidoc"
-PACKAGES+=" asciidoctor" # Used by weechat for man pages.
+PACKAGES+=" asciidoctor" # 由 weechat 用于 man 页面。
 PACKAGES+=" automake"
 PACKAGES+=" bison"
-PACKAGES+=" clang" # Used by golang, useful to have same compiler building.
-PACKAGES+=" curl" # Used for fetching sources.
-PACKAGES+=" ed" # Used by bc.
-PACKAGES+=" expat" # Needed by ghostscript.
+PACKAGES+=" clang" # 由 golang 使用，使用相同的编译器构建很有用。
+PACKAGES+=" curl" # 用于获取源代码。
+PACKAGES+=" ed" # 由 bc 使用。
+PACKAGES+=" expat" # ghostscript 需要。
 PACKAGES+=" flex"
-PACKAGES+=" gawk" # Needed by apr-util.
-PACKAGES+=" gcc" # Host C/C++ compiler.
-PACKAGES+=" gettext" # Provides 'msgfmt'.
-PACKAGES+=" git" # Used by the neovim build.
-PACKAGES+=" glib2" # Provides 'glib-genmarshal' which the glib build uses.
-PACKAGES+=" gnupg" # Needed to verify downloaded debs.
-PACKAGES+=" gperf" # Used by the fontconfig build.
+PACKAGES+=" gawk" # apr-util 需要。
+PACKAGES+=" gcc" # 主机 C/C++ 编译器。
+PACKAGES+=" gettext" # 提供 'msgfmt'。
+PACKAGES+=" git" # 由 neovim 构建使用。
+PACKAGES+=" glib2" # 提供 'glib-genmarshal'，glib 构建使用它。
+PACKAGES+=" gnupg" # 需要验证下载的 deb。
+PACKAGES+=" gperf" # 由 fontconfig 构建使用。
 PACKAGES+=" help2man"
-PACKAGES+=" intltool" # Used by qalc build.
+PACKAGES+=" intltool" # 由 qalc 构建使用。
 PACKAGES+=" jre8-openjdk-headless"
-PACKAGES+=" jq" # Required for parsing repo.json
-PACKAGES+=" re2c" # Needed by kphp-timelib
-PACKAGES+=" libjpeg-turbo" # Needed by ghostscript.
+PACKAGES+=" jq" # 需要解析 repo.json
+PACKAGES+=" re2c" # kphp-timelib 需要
+PACKAGES+=" libjpeg-turbo" # ghostscript 需要。
 PACKAGES+=" libtool"
-PACKAGES+=" lua" # Needed to build luarocks package.
+PACKAGES+=" lua" # 需要构建 luarocks 包。
 PACKAGES+=" lzip"
 PACKAGES+=" m4"
-PACKAGES+=" openssl"  # Needed to build rust.
+PACKAGES+=" openssl"  # 需要构建 rust。
 PACKAGES+=" patch"
 PACKAGES+=" pkgconf"
 PACKAGES+=" python"
-PACKAGES+=" python-docutils" # For rst2man, used by mpv.
-PACKAGES+=" python-recommonmark" # Needed for LLVM-8 documentation.
-PACKAGES+=" python-setuptools" # Needed by at least asciinema.
-PACKAGES+=" python-sphinx" # Needed by notmuch man page generation.
-PACKAGES+=" ruby" # Needed to build ruby.
-PACKAGES+=" scdoc" # Needed by aerc.
+PACKAGES+=" python-docutils" # 用于 rst2man，由 mpv 使用。
+PACKAGES+=" python-recommonmark" # LLVM-8 文档需要。
+PACKAGES+=" python-setuptools" # 至少 asciinema 需要。
+PACKAGES+=" python-sphinx" # notmuch man 页面生成需要。
+PACKAGES+=" ruby" # 需要构建 ruby。
+PACKAGES+=" scdoc" # aerc 需要。
 PACKAGES+=" scons"
 PACKAGES+=" tar"
 PACKAGES+=" texinfo"
 PACKAGES+=" unzip"
 PACKAGES+=" xmlto"
 
-# Do not require sudo if already running as root.
+# 如果已经以 root 身份运行，则不需要 sudo。
 if [ "$(id -u)" = "0" ]; then
 	SUDO=""
 else
@@ -54,14 +54,14 @@ $SUDO pacman -Syq --needed --noconfirm $PACKAGES
 
 . $(dirname "$(realpath "$0")")/properties.sh
 
-# Ownership of `TERMUX__PREFIX` must be fixed before `TERMUX_APP__DATA_DIR`
-# if its under it, otherwise `TERMUX__ROOTFS` will not have its ownership fixed.
+# 如果 `TERMUX__PREFIX` 在 `TERMUX_APP__DATA_DIR` 下，则必须在 `TERMUX_APP__DATA_DIR` 之前修复其所有权
+# 否则 `TERMUX__ROOTFS` 将不会修复其所有权。
 $SUDO mkdir -p "$TERMUX__PREFIX"
 $SUDO chown -R "$(whoami)" "$TERMUX__PREFIX"
 $SUDO mkdir -p "$TERMUX_APP__DATA_DIR"
-$SUDO chown -R "$(whoami)" "${TERMUX_APP__DATA_DIR%"${TERMUX_APP__DATA_DIR#/*/}"}" # Get `/path/` from `/path/to/app__data_dir`.
+$SUDO chown -R "$(whoami)" "${TERMUX_APP__DATA_DIR%"${TERMUX_APP__DATA_DIR#/*/}"}" # 从 `/path/to/app__data_dir` 获取 `/path/`。
 
-echo "Please also install the following packages from the AUR before continuing"
+echo "继续之前，请从 AUR 安装以下包"
 echo
 echo "- ncurses5-compat-libs"
 echo "- makedepend"

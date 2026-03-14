@@ -13,12 +13,12 @@ termux_setup_xmake() {
 	if [[ "${TERMUX_ON_DEVICE_BUILD}" == "true" ]]; then
 		if [[ "$(cat "${TERMUX_BUILT_PACKAGES_DIRECTORY}/xmake" 2>/dev/null)" != "${XMAKE_PKG_VERSION}" && -z "$(command -v xmake)" ]]; then
 			cat <<- EOL >&2
-			Package 'xmake' is not installed.
-			You can install it with
+			未安装 'xmake' 软件包。
+			您可以通过以下方式安装：
 
 			pkg install xmake
 
-			or build it from source with
+			或从源代码构建：
 
 			./build-package.sh xmake
 			EOL
@@ -27,9 +27,9 @@ termux_setup_xmake() {
 		return
 	fi
 
-	# always assume host build as xmake dont provide prebuilt binary
-	# dont use xmake-*.run as it uses single core to build and
-	# auto installs into ~/.local/{bin,share}
+	# 始终假设主机构建，因为 xmake 不提供预构建的二进制文件
+	# 不要使用 xmake-*.run，因为它使用单核构建并且
+	# 自动安装到 ~/.local/{bin,share}
 
 	if [[ ! -x "${XMAKE_FOLDER}/bin/xmake" ]]; then
 		mkdir -p "${XMAKE_FOLDER}"
@@ -39,7 +39,7 @@ termux_setup_xmake() {
 		# xmake injects -m64 and -m32 when it shouldnt
 		local files=$(grep -E "march = \"-m(32|64)" -nHR "${XMAKE_FOLDER}" | grep -E "gcc" | cut -d":" -f1 | sort)
 		for f in ${files}; do
-			echo "termux_setup_xmake: Patching ${f}"
+			echo "termux_setup_xmake: 正在修补 ${f}"
 			sed -e "/.*march = \"-m.*/d" -i "${f}"
 		done
 

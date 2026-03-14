@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 ##
-## Download all package sources and install all build tools whether possible,
-## so they will be available offline.
+## 下载所有包源代码并尽可能安装所有构建工具，
+## 以便它们可以离线使用。
 ##
 
 set -e -u
 
 if [ "$(uname -o)" = "Android" ] || [ "$(uname -m)" != "x86_64" ]; then
-	echo "This script supports only x86_64 GNU/Linux systems."
+	echo "此脚本仅支持 x86_64 GNU/Linux 系统。"
 	exit 1
 fi
 
@@ -35,7 +35,7 @@ export CPPFLAGS="" CFLAGS="" CXXFLAGS="" LDFLAGS=""
 export TERMUX_PACKAGE_LIBRARY=bionic
 mkdir -p "$TERMUX_PKG_TMPDIR"
 
-# Build tools.
+# 构建工具。
 . "$TERMUX_SCRIPTDIR"/scripts/build/termux_download.sh
 (. "$TERMUX_SCRIPTDIR"/scripts/build/setup/termux_setup_cargo_c.sh
 	termux_setup_cargo_c
@@ -43,7 +43,7 @@ mkdir -p "$TERMUX_PKG_TMPDIR"
 (. "$TERMUX_SCRIPTDIR"/scripts/build/setup/termux_setup_cmake.sh
 	termux_setup_cmake
 )
-# GHC fails. Skipping for now.
+# GHC 失败。暂时跳过。
 #(. "$TERMUX_SCRIPTDIR"/scripts/build/setup/termux_setup_ghc.sh
 #	termux_setup_ghc
 #)
@@ -61,7 +61,7 @@ mkdir -p "$TERMUX_PKG_TMPDIR"
 #(. "$TERMUX_SCRIPTDIR"/scripts/build/setup/termux_setup_python_pip.sh
 #	termux_setup_python_pip
 #)
-# Offline rust is not supported yet.
+# 离线 rust 尚不支持。
 #(. "$TERMUX_SCRIPTDIR"/scripts/build/setup/termux_setup_rust.sh
 #	termux_setup_rust
 #)
@@ -76,7 +76,7 @@ mkdir -p "$TERMUX_PKG_TMPDIR"
 )
 rm -rf "${TERMUX_PKG_TMPDIR}"
 
-# Package sources.
+# 包源代码。
 for repo_path in $(jq --raw-output 'del(.pkg_format) | keys | .[]' $TERMUX_SCRIPTDIR/repo.json); do
 	for p in "$TERMUX_SCRIPTDIR"/$repo_path/*; do
 		(
@@ -85,7 +85,7 @@ for repo_path in $(jq --raw-output 'del(.pkg_format) | keys | .[]' $TERMUX_SCRIP
 			. "$TERMUX_SCRIPTDIR"/scripts/build/get_source/termux_download_src_archive.sh
 			. "$TERMUX_SCRIPTDIR"/scripts/build/get_source/termux_unpack_src_archive.sh
 
-			# Disable archive extraction in termux_step_get_source.sh.
+			# 在 termux_step_get_source.sh 中禁用归档提取。
 			termux_extract_src_archive() {
 				:
 			}
@@ -95,7 +95,7 @@ for repo_path in $(jq --raw-output 'del(.pkg_format) | keys | .[]' $TERMUX_SCRIP
 			TERMUX_PKG_CACHEDIR="${p}/cache"
 			TERMUX_PKG_METAPACKAGE=false
 
-			# Set some variables to dummy values to avoid errors.
+			# 将一些变量设置为虚拟值以避免错误。
 			TERMUX_PKG_TMPDIR="${TERMUX_PKG_CACHEDIR}/.tmp"
 			TERMUX_PKG_SRCDIR="${TERMUX_PKG_CACHEDIR}/.src"
 			TERMUX_PKG_BUILDDIR="$TERMUX_PKG_SRCDIR"
@@ -109,15 +109,15 @@ for repo_path in $(jq --raw-output 'del(.pkg_format) | keys | .[]' $TERMUX_SCRIP
 
 			. "${p}"/build.sh || true
 			if ! ${TERMUX_PKG_METAPACKAGE}; then
-				echo "Downloading sources for '$TERMUX_PKG_NAME'..."
+				echo "正在下载 '$TERMUX_PKG_NAME' 的源代码..."
 				termux_step_get_source
 
-				# Delete dummy src and tmp directories.
+				# 删除虚拟 src 和 tmp 目录。
 				rm -rf "$TERMUX_PKG_TMPDIR" "$TERMUX_PKG_SRCDIR"
 			fi
 		)
 	done
 done
 
-# Mark to tell build-package.sh to enable offline mode.
+# 标记以告诉 build-package.sh 启用离线模式。
 touch "$TERMUX_SCRIPTDIR"/build-tools/.installed

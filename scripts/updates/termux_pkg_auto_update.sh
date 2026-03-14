@@ -5,7 +5,7 @@ termux_pkg_auto_update() {
 		return $?
 	fi
 
-	# Example:
+	# 示例：
 	# https://github.com/vim/vim/archive/refs/tags/v${TERMUX_PKG_VERSION}.tar.gz
 	#            _="https:"
 	#            _=""
@@ -14,11 +14,11 @@ termux_pkg_auto_update() {
 	local project_host
 	IFS='/' read -r _ _ project_host _ <<< "${TERMUX_PKG_SRCURL}"
 
-	# gitlab.gnome.org started responding to API requests originating from
-	# GitHub Actions with HTTP 403 errors in January 2026.
-	# Example command failing in GitHub Actions:
+	# gitlab.gnome.org 从 2026 年 1 月开始响应来自 GitHub Actions 的 API 请求时
+	# 返回 HTTP 403 错误。
+	# 在 GitHub Actions 中失败的命令示例：
 	# curl https://gitlab.gnome.org/api/v4/projects/GNOME%2Fvte/releases/permalink/latest
-	# See: https://github.com/termux/termux-packages/issues/28242
+	# 参见：https://github.com/termux/termux-packages/issues/28242
 	if [[ -z "${TERMUX_PKG_UPDATE_METHOD}" ]]; then
 		if [[ "${project_host}" == "github.com" ]]; then
 			TERMUX_PKG_UPDATE_METHOD="github"
@@ -33,8 +33,8 @@ termux_pkg_auto_update() {
 		github)
 			if [[ "${project_host}" != "${TERMUX_PKG_UPDATE_METHOD}.com" ]]; then
 				termux_error_exit <<-EndOfError
-					source url's hostname is not ${TERMUX_PKG_UPDATE_METHOD}.com, but has been
-					configured to use ${TERMUX_PKG_UPDATE_METHOD}'s method.
+					源 URL 的主机名不是 ${TERMUX_PKG_UPDATE_METHOD}.com，但已被
+					配置为使用 ${TERMUX_PKG_UPDATE_METHOD} 的方法。
 				EndOfError
 			fi
 			termux_github_auto_update
@@ -47,8 +47,9 @@ termux_pkg_auto_update() {
 		;;
 		*)
 			termux_error_exit <<-EndOfError
-				wrong value '${TERMUX_PKG_UPDATE_METHOD}' for TERMUX_PKG_UPDATE_METHOD.
-				Can be 'github', 'gitlab' or 'repology'
+				TERMUX_PKG_UPDATE_METHOD 的值 '${TERMUX_PKG_UPDATE_METHOD}' 错误。
+
+				可以是 'github'、'gitlab' 或 'repology'
 			EndOfError
 		;;
 	esac

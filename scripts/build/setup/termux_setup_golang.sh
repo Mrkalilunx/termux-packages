@@ -1,4 +1,4 @@
-# Utility function for golang-using packages to setup a go toolchain.
+# 用于使用 golang 的软件包的实用工具函数，用于设置 go 工具链。
 termux_setup_golang() {
 	export GOPATH="${TERMUX_COMMON_CACHEDIR}/go-path" GOCACHE="${TERMUX_COMMON_CACHEDIR}/go-build"
 	mkdir -p "$GOPATH" "$GOCACHE"
@@ -43,14 +43,14 @@ termux_setup_golang() {
 	else
 		if [[ "$TERMUX_APP_PACKAGE_MANAGER" = "apt" && "$(dpkg-query -W -f '${db:Status-Status}\n' golang 2>/dev/null)" != "installed" ]] ||
 		[[ "$TERMUX_APP_PACKAGE_MANAGER" = "pacman" && ! "$(pacman -Q golang 2>/dev/null)" ]]; then
-			echo "Package 'golang' is not installed."
-			echo "You can install it with"
+			echo "未安装 'golang' 软件包。"
+			echo "您可以通过以下方式安装："
 			echo
 			echo "  pkg install golang"
 			echo
 			echo "  pacman -S golang"
 			echo
-			echo "or build it from source with"
+			echo "或从源代码构建："
 			echo
 			echo "  ./build-package.sh golang"
 			echo

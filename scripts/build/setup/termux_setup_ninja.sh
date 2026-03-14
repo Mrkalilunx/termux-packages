@@ -25,14 +25,14 @@ termux_setup_ninja() {
 		    [ "$(cat "$TERMUX_BUILT_PACKAGES_DIRECTORY/ninja")" != "$NINJA_PKG_VERSION" ]) &&
 		   ([[ "$TERMUX_APP_PACKAGE_MANAGER" = "apt" && "$(dpkg-query -W -f '${db:Status-Status}\n' ninja 2>/dev/null)" != "installed" ]] ||
 		    [[ "$TERMUX_APP_PACKAGE_MANAGER" = "pacman" && ! "$(pacman -Q ninja 2>/dev/null)" ]]); then
-			echo "Package 'ninja' is not installed."
-			echo "You can install it with"
+			echo "未安装 'ninja' 软件包。"
+			echo "您可以通过以下方式安装："
 			echo
 			echo "  pkg install ninja"
 			echo
 			echo "  pacman -S ninja"
 			echo
-			echo "or build it from source with"
+			echo "或从源代码构建："
 			echo
 			echo "  ./build-package.sh ninja"
 			echo

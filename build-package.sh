@@ -1,12 +1,11 @@
 #!/bin/bash
 
-# Setting the TMPDIR variable
+# 设置 TMPDIR 环境变量
 : "${TMPDIR:=/tmp}"
 export TMPDIR
 
-# Set the build-package.sh call depth
-# If its the root call, then create a file to store the list of packages and their dependencies
-# that have been compiled at any instant by recursive calls to build-package.sh
+# 设置 build-package.sh 调用深度
+# 如果是根调用，则创建一个文件来存储通过递归调用 build-package.sh 在任何时刻已编译的包及其依赖项列表
 if (( ${TERMUX_BUILD_PACKAGE_CALL_DEPTH-0} )); then
 	export TERMUX_BUILD_PACKAGE_CALL_DEPTH=$((TERMUX_BUILD_PACKAGE_CALL_DEPTH+1))
 else
@@ -24,12 +23,12 @@ cd "$(realpath "$(dirname "$0")")"
 TERMUX_SCRIPTDIR=$(pwd)
 export TERMUX_SCRIPTDIR
 
-# Store pid of current process in a file for docker__run_docker_exec_trap
+# 将当前进程的 pid 存储到文件中，供 docker__run_docker_exec_trap 使用
 # shellcheck source=scripts/utils/docker/docker.sh
 source "$TERMUX_SCRIPTDIR/scripts/utils/docker/docker.sh"
 docker__create_docker_exec_pid_file
 
-# Source the `termux_package` library.
+# 加载 `termux_package` 库
 # shellcheck source=scripts/utils/termux/package/termux_package.sh
 source "$TERMUX_SCRIPTDIR/scripts/utils/termux/package/termux_package.sh"
 
@@ -37,25 +36,25 @@ export SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH:-$(git -c log.showSignature=false l
 
 if [[ "$(uname -o)" == "Android" || -e "/system/bin/app_process" ]]; then
 	if [[ "$(id -u)" == "0" ]]; then
-		echo "On-device execution of this script as root is disabled."
+		echo "此脚本不支持以 root 身份在设备上执行。"
 		exit 1
 	fi
 
-	# This variable tells all parts of build system that
-	# the build is being performed on device.
+	# 此变量告诉构建系统的所有部分
+	# 构建正在设备上执行
 	export TERMUX_ON_DEVICE_BUILD=true
 else
 	export TERMUX_ON_DEVICE_BUILD=false
 fi
 
-# Automatically enable offline set of sources and build tools.
-# Offline termux-packages bundle can be created by executing
-# script ./scripts/setup-offline-bundle.sh.
+# 自动启用离线源代码和构建工具集
+# 离线 termux-packages 捆绑包可以通过执行
+# 脚本 ./scripts/setup-offline-bundle.sh 创建
 if [[ -f "${TERMUX_SCRIPTDIR}/build-tools/.installed" ]]; then
 	export TERMUX_PACKAGES_OFFLINE=true
 fi
 
-# Lock file to prevent parallel running in the same environment.
+# 锁文件，防止在同一环境中并行运行
 TERMUX_BUILD_LOCK_FILE="${TMPDIR}/.termux-build.lck"
 if [[ ! -e "$TERMUX_BUILD_LOCK_FILE" ]]; then
 	touch "$TERMUX_BUILD_LOCK_FILE"
@@ -64,366 +63,365 @@ fi
 TERMUX_REPO_PKG_FORMAT="$(jq --raw-output '.pkg_format // "debian"' "${TERMUX_SCRIPTDIR}/repo.json")"
 export TERMUX_REPO_PKG_FORMAT
 
-# Special variable for internal use. It forces script to ignore
-# lock file.
+# 用于内部使用的特殊变量。它强制脚本忽略
+# 锁文件
 : "${TERMUX_BUILD_IGNORE_LOCK:=false}"
 
-# Utility function to log an error message and exit with an error code.
+# 记录错误消息并以错误代码退出的实用函数
 # shellcheck source=scripts/build/termux_error_exit.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_error_exit.sh"
 
-# Utility function to download a resource with an expected checksum.
+# 使用预期校验和下载资源的实用函数
 # shellcheck source=scripts/build/termux_download.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_download.sh"
 
-# Utility function to run binaries under termux environment via proot.
+# 通过 proot 在 termux 环境下运行二进制文件的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_proot.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_proot.sh"
 
-# Utility function to setup blueprint-compiler (may be used by gnome-calculator and epiphany).
+# 设置 blueprint-compiler 的实用函数（可能被 gnome-calculator 和 epiphany 使用）
 # shellcheck source=scripts/build/setup/termux_setup_bpc.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_bpc.sh"
 
-# Installing packages if necessary for the full operation of CGCT.
+# 安装必要的包以使 CGCT 完全运行
 # shellcheck source=scripts/build/termux_step_setup_cgct_environment.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_setup_cgct_environment.sh"
 
-# Utility function to setup capnproto (may be used by bitcoin).
+# 设置 capnproto 的实用函数（可能被 bitcoin 使用）
 # shellcheck source=scripts/build/setup/termux_setup_capnp.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_capnp.sh"
 
-# Utility function for setting up Cargo C-ABI helpers.
+# 设置 Cargo C-ABI 助手的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_cargo_c.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_cargo_c.sh"
 
-# Utility function for setting up pkg-config wrapper.
+# 设置 pkg-config 包装器的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_pkg_config_wrapper.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_pkg_config_wrapper.sh"
 
-# Utility function for setting up Crystal toolchain.
+# 设置 Crystal 工具链的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_crystal.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_crystal.sh"
 
-# Utility function for setting up DotNet toolchain.
+# 设置 DotNet 工具链的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_dotnet.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_dotnet.sh"
 
-# Utility function for setting up Flang toolchain.
+# 设置 Flang 工具链的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_flang.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_flang.sh"
 
-# Utility function to setup a GHC cross-compiler toolchain targeting Android.
+# 设置针对 Android 的 GHC 交叉编译器工具链的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_ghc.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_ghc.sh"
 
-# Utility function to setup GHC iserv to cross-compile haskell-template.
+# 设置 GHC iserv 以交叉编译 haskell-template 的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_ghc_iserv.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_ghc_iserv.sh"
 
-# Utility function to setup cabal-install (may be used by ghc toolchain).
+# 设置 cabal-install 的实用函数（可能被 ghc 工具链使用）
 # shellcheck source=scripts/build/setup/termux_setup_cabal.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_cabal.sh"
 
-# Utility function to setup jailbreak-cabal. It is used to remove version constraints
-# from Cabal packages.
+# 设置 jailbreak-cabal 的实用函数。它用于从 Cabal 包中移除版本约束
 # shellcheck source=scripts/build/setup/termux_setup_jailbreak_cabal.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_jailbreak_cabal.sh"
 
-# Utility function for setting up GObject Introspection cross environment.
+# 设置 GObject 内省交叉环境的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_gir.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_gir.sh"
 
-# Utility function for setting up GN toolchain.
+# 设置 GN 工具链的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_gn.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_gn.sh"
 
-# Utility function for golang-using packages to setup a go toolchain.
+# 为使用 golang 的包设置 go 工具链的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_golang.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_golang.sh"
 
-# Utility function for setting up LDC cross environment.
+# 设置 LDC 交叉环境的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_ldc.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_ldc.sh"
 
-# Utility function for setting up no-integrated (GNU Binutils) as.
+# 设置非集成（GNU Binutils）as 的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_no_integrated_as.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_no_integrated_as.sh"
 
-# Utility function for setting up build-python for cross-compilation of Python and crossenv
+# 设置 build-python 用于交叉编译 Python 和 crossenv 的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_build_python.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_build_python.sh"
 
-# Utility function for python packages to setup a python.
+# 为 python 包设置 python 的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_python_pip.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_python_pip.sh"
 
-# Utility function for rust-using packages to setup a rust toolchain.
+# 为使用 rust 的包设置 rust 工具链的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_rust.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_rust.sh"
 
-# Utility function for swift-using packages to setup a swift toolchain
+# 为使用 swift 的包设置 swift 工具链的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_swift.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_swift.sh"
 
-# Utility function to setup a current xmake build system.
+# 设置当前 xmake 构建系统的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_xmake.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_xmake.sh"
 
-# Utility function for zig-using packages to setup a zig toolchain.
+# 为使用 zig 的包设置 zig 工具链的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_zig.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_zig.sh"
 
-# Utility function to setup a current ninja build system.
+# 设置当前 ninja 构建系统的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_ninja.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_ninja.sh"
 
-# Utility function to setup Node.js JavaScript Runtime
+# 设置 Node.js JavaScript 运行时的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_nodejs.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_nodejs.sh"
 
-# Utility function to setup a current meson build system.
+# 设置当前 meson 构建系统的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_meson.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_meson.sh"
 
-# Utility function to setup a current cmake build system
+# 设置当前 cmake 构建系统的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_cmake.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_cmake.sh"
 
-# Utility function to setup protobuf:
+# 设置 protobuf 的实用函数：
 # shellcheck source=scripts/build/setup/termux_setup_protobuf.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_protobuf.sh"
 
-# Utility function to setup the current version of the tree-sitter CLI
+# 设置 tree-sitter CLI 当前版本的实用函数
 # shellcheck source=scripts/build/setup/termux_setup_treesitter.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_treesitter.sh"
 
-# Setup variables used by the build. Not to be overridden by packages.
+# 设置构建所使用的变量。包不应覆盖这些变量
 # shellcheck source=scripts/build/termux_step_setup_variables.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_setup_variables.sh"
 
-# Save away and restore build setups which may change between builds.
+# 保存和恢复可能在构建之间更改的构建设置
 # shellcheck source=scripts/build/termux_step_handle_buildarch.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_handle_buildarch.sh"
 
-# Function to get TERMUX_PKG_VERSION from build.sh
+# 从 build.sh 获取 TERMUX_PKG_VERSION 的函数
 # shellcheck source=scripts/build/termux_extract_dep_info.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_extract_dep_info.sh"
 
-# Function that downloads a .deb (using the termux_download function)
+# 下载 .deb 的函数（使用 termux_download 函数）
 # shellcheck source=scripts/build/termux_download_deb_pac.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_download_deb_pac.sh"
 
-# Function that downloads and extracts multiple Ubuntu packages (using the termux_download function)
+# 下载并提取多个 Ubuntu 包的函数（使用 termux_download 函数）
 # shellcheck source=scripts/build/termux_download_ubuntu_packages.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_download_ubuntu_packages.sh"
 
-# Script to download InRelease, verify it's signature and then download Packages.xz by hash
+# 下载 InRelease，验证其签名，然后通过哈希下载 Packages.xz 的脚本
 # shellcheck source=scripts/build/termux_get_repo_files.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_get_repo_files.sh"
 
-# Download or build dependencies. Not to be overridden by packages.
+# 下载或构建依赖项。包不应覆盖
 # shellcheck source=scripts/build/termux_step_get_dependencies.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_get_dependencies.sh"
 
-# Download python dependency modules for compilation.
+# 下载编译用的 python 依赖模块
 # shellcheck source=scripts/build/termux_step_get_dependencies_python.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_get_dependencies_python.sh"
 
-# Handle config scripts that needs to be run during build. Not to be overridden by packages.
+# 处理构建期间需要运行的配置脚本。包不应覆盖
 # shellcheck source=scripts/build/termux_step_override_config_scripts.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_override_config_scripts.sh"
 
-# Remove old src and build folders and create new ones
+# 删除旧的 src 和 build 文件夹并创建新的
 # shellcheck source=scripts/build/termux_step_setup_build_folders.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_setup_build_folders.sh"
 
-# Source the package build script and start building. Not to be overridden by packages.
+# 加载包构建脚本并开始构建。包不应覆盖
 # shellcheck source=scripts/build/termux_step_start_build.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_start_build.sh"
 
-# Cleans up files from already built packages. Not to be overridden by packages.
+# 清理已构建包的文件。包不应覆盖
 # shellcheck source=scripts/build/termux_step_start_build.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_cleanup_packages.sh"
 
-# Download or build dependencies. Not to be overridden by packages.
+# 下载或构建依赖项。包不应覆盖
 # shellcheck source=scripts/build/termux_step_create_timestamp_file.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_create_timestamp_file.sh"
 
-# Run just after sourcing $TERMUX_PKG_BUILDER_SCRIPT. Can be overridden by packages.
+# 在加载 $TERMUX_PKG_BUILDER_SCRIPT 后立即运行。包可以覆盖
 # shellcheck source=scripts/build/get_source/termux_step_get_source.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/get_source/termux_step_get_source.sh"
 
-# Run from termux_step_get_source if TERMUX_PKG_SRCURL begins with "git+".
+# 如果 TERMUX_PKG_SRCURL 以 "git+" 开头，则从 termux_step_get_source 运行
 # shellcheck source=scripts/build/get_source/termux_step_get_source.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/get_source/termux_git_clone_src.sh"
 
-# Run from termux_step_get_source if TERMUX_PKG_SRCURL does not begin with "git+".
+# 如果 TERMUX_PKG_SRCURL 不以 "git+" 开头，则从 termux_step_get_source 运行
 # shellcheck source=scripts/build/get_source/termux_download_src_archive.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/get_source/termux_download_src_archive.sh"
 
-# Run from termux_step_get_source after termux_download_src_archive.
+# 在 termux_download_src_archive 之后从 termux_step_get_source 运行
 # shellcheck source=scripts/build/get_source/termux_unpack_src_archive.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/get_source/termux_unpack_src_archive.sh"
 
-# Hook for packages to act just after the package sources have been obtained.
-# Invoked from $TERMUX_PKG_SRCDIR.
+# 包在获取包源代码后可以执行的钩子
+# 从 $TERMUX_PKG_SRCDIR 调用
 termux_step_post_get_source() {
 	return
 }
 
-# Optional host build. Not to be overridden by packages.
+# 可选的主机构建。包不应覆盖
 # shellcheck source=scripts/build/termux_step_handle_host_build.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_handle_host_build.sh"
 
-# Perform a host build. Will be called in $TERMUX_PKG_HOSTBUILD_DIR.
-# After termux_step_post_get_source() and before termux_step_patch_package()
+# 执行主机构建。将在 $TERMUX_PKG_HOSTBUILD_DIR 中调用
+# 在 termux_step_post_get_source() 之后和 termux_step_patch_package() 之前
 # shellcheck source=scripts/build/termux_step_host_build.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_host_build.sh"
 
-# Setup a standalone Android NDK toolchain. Called from termux_step_setup_toolchain.
+# 设置独立的 Android NDK 工具链。从 termux_step_setup_toolchain 调用
 # shellcheck source=scripts/build/toolchain/termux_setup_toolchain_29.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/toolchain/termux_setup_toolchain_29.sh"
 
-# Setup a standalone Android NDK 23c toolchain. Called from termux_step_setup_toolchain.
+# 设置独立的 Android NDK 23c 工具链。从 termux_step_setup_toolchain 调用
 # shellcheck source=scripts/build/toolchain/termux_setup_toolchain_23c.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/toolchain/termux_setup_toolchain_23c.sh"
 
-# Setup a standalone Glibc GNU toolchain. Called from termux_step_setup_toolchain.
+# 设置独立的 Glibc GNU 工具链。从 termux_step_setup_toolchain 调用
 # shellcheck source=scripts/build/toolchain/termux_setup_toolchain_gnu.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/toolchain/termux_setup_toolchain_gnu.sh"
 
-# Runs termux_step_setup_toolchain_${TERMUX_NDK_VERSION}. Not to be overridden by packages.
+# 运行 termux_step_setup_toolchain_${TERMUX_NDK_VERSION}。包不应覆盖
 # shellcheck source=scripts/build/termux_step_setup_toolchain.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_setup_toolchain.sh"
 
-# Apply all *.patch files for the package. Not to be overridden by packages.
+# 应用包的所有 *.patch 文件。包不应覆盖
 # shellcheck source=scripts/build/termux_step_patch_package.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_patch_package.sh"
 
-# Replace autotools build-aux/config.{sub,guess} with ours to add android targets.
+# 用我们的 autotools build-aux/config.{sub,guess} 替换以添加 android 目标
 # shellcheck source=scripts/build/termux_step_replace_guess_scripts.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_replace_guess_scripts.sh"
 
-# For package scripts to override. Called in $TERMUX_PKG_BUILDDIR.
+# 供包脚本覆盖。在 $TERMUX_PKG_BUILDDIR 中调用
 termux_step_pre_configure() {
 	return
 }
 
-# Setup configure args and run $TERMUX_PKG_SRCDIR/configure. This function is called from termux_step_configure
+# 设置配置参数并运行 $TERMUX_PKG_SRCDIR/configure。此函数从 termux_step_configure 调用
 # shellcheck source=scripts/build/configure/termux_step_configure_autotools.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/configure/termux_step_configure_autotools.sh"
 
-# Setup configure args and run cmake. This function is called from termux_step_configure
+# 设置配置参数并运行 cmake。此函数从 termux_step_configure 调用
 # shellcheck source=scripts/build/configure/termux_step_configure_cmake.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/configure/termux_step_configure_cmake.sh"
 
-# Setup configure args and run meson. This function is called from termux_step_configure
+# 设置配置参数并运行 meson。此函数从 termux_step_configure 调用
 # shellcheck source=scripts/build/configure/termux_step_configure_meson.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/configure/termux_step_configure_meson.sh"
 
-# Setup configure args and run cabal. This function is called from termux_step_configure
+# 设置配置参数并运行 cabal。此函数从 termux_step_configure 调用
 # shellcheck source=scripts/build/configure/termux_step_configure_cabal.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/configure/termux_step_configure_cabal.sh"
 
-# Configure the package
+# 配置包
 # shellcheck source=scripts/build/configure/termux_step_configure.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/configure/termux_step_configure.sh"
 
-# Hook for packages after configure step
+# 配置步骤后包的钩子
 termux_step_post_configure() {
 	return
 }
 
-# Make package, either with ninja or make
+# 构建包，使用 ninja 或 make
 # shellcheck source=scripts/build/termux_step_make.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_make.sh"
 
-# Make install, either with ninja, make of cargo
+# 安装包，使用 ninja、make 或 cargo
 # shellcheck source=scripts/build/termux_step_make_install.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_make_install.sh"
 
-# Hook function for package scripts to override.
+# 供包脚本覆盖的钩子函数
 termux_step_post_make_install() {
 	return
 }
 
-# Install hooks (alpm-hooks) and hook-scripts into the pacman package
+# 将 hooks (alpm-hooks) 和 hook-scripts 安装到 pacman 包中
 # shellcheck source=scripts/build/termux_step_install_pacman_hooks.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_install_pacman_hooks.sh"
 
-# Add service scripts from array TERMUX_PKG_SERVICE_SCRIPT, if it is set
+# 如果设置了数组 TERMUX_PKG_SERVICE_SCRIPT，则添加服务脚本
 # shellcheck source=scripts/build/termux_step_install_service_scripts.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_install_service_scripts.sh"
 
-# Link/copy the LICENSE for the package to $TERMUX_PREFIX/share/$TERMUX_PKG_NAME/
+# 将包的 LICENSE 链接/复制到 $TERMUX_PREFIX/share/$TERMUX_PKG_NAME/
 # shellcheck source=scripts/build/termux_step_install_license.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_install_license.sh"
 
-# Function to cp (through tar) installed files to massage dir
+# 将已安装的文件 cp（通过 tar）到处理目录的函数
 # shellcheck source=scripts/build/termux_step_copy_into_massagedir.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_copy_into_massagedir.sh"
 
-# Hook function to create {pre,post}install, {pre,post}rm-scripts for subpkgs
+# 为子包创建 {pre,post}install, {pre,post}rm-scripts 的钩子函数
 # shellcheck source=scripts/build/termux_step_create_subpkg_debscripts.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_create_subpkg_debscripts.sh"
 
-# Create all subpackages. Run from termux_step_massage
+# 创建所有子包。从 termux_step_massage 运行
 # shellcheck source=scripts/build/termux_create_debian_subpackages.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_create_debian_subpackages.sh"
 
-# Create all subpackages. Run from termux_step_massage
+# 创建所有子包。从 termux_step_massage 运行
 # shellcheck source=scripts/build/termux_create_pacman_subpackages.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_create_pacman_subpackages.sh"
 
-# Function to run various cleanup/fixes
+# 运行各种清理/修复的函数
 # shellcheck source=scripts/build/termux_step_massage.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_massage.sh"
 
-# Function to run strip symbols during termux_step_massage
+# 在 termux_step_massage 期间运行 strip 符号的函数
 # shellcheck source=scripts/build/termux_step_strip_elf_symbols.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_strip_elf_symbols.sh"
 
-# Function to run termux-elf-cleaner during termux_step_massage
+# 在 termux_step_massage 期间运行 termux-elf-cleaner 的函数
 # shellcheck source=scripts/build/termux_step_elf_cleaner.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_elf_cleaner.sh"
 
-# Hook for packages before massage step
+# 处理步骤前包的钩子
 termux_step_pre_massage() {
 	return
 }
 
-# Hook for packages after massage step
+# 处理步骤后包的钩子
 termux_step_post_massage() {
 	return
 }
 
-# Function to create {pre,post}install, {pre,post}rm-scripts and similar
+# 创建 {pre,post}install, {pre,post}rm-scripts 和类似脚本的函数
 # shellcheck source=scripts/build/termux_step_create_debscripts.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_create_debscripts.sh"
 
-# Function to generate debscripts for python packages.
+# 为 python 包生成 debscripts 的函数
 # shellcheck source=scripts/build/termux_step_create_python_debscripts.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_create_python_debscripts.sh"
 
-# Convert Debian maintainer scripts into pacman-compatible installation hooks.
-# This is used only when creating pacman packages.
+# 将 Debian 维护者脚本转换为 pacman 兼容的安装钩子
+# 这仅在创建 pacman 包时使用
 # shellcheck source=scripts/build/termux_step_create_pacman_install_hook.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_create_pacman_install_hook.sh"
 
-# Create the build deb file. Not to be overridden by package scripts.
+# 创建构建 deb 文件。包脚本不应覆盖
 # shellcheck source=scripts/build/termux_step_create_debian_package.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_create_debian_package.sh"
 
-# Create the build .pkg.tar.xz file. Not to be overridden by package scripts.
+# 创建构建 .pkg.tar.xz 文件。包脚本不应覆盖
 # shellcheck source=scripts/build/termux_step_create_pacman_package.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_create_pacman_package.sh"
 
-# Process 'update-alternatives' entries from `.alternatives` files.
-# Not to be overridden by package scripts.
+# 从 `.alternatives` 文件处理 'update-alternatives' 条目
+# 包脚本不应覆盖
 # shellcheck source=scripts/build/termux_step_update_alternatives.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_update_alternatives.sh"
 
-# Finish the build. Not to be overridden by package scripts.
+# 完成构建。包脚本不应覆盖
 # shellcheck source=scripts/build/termux_step_finish_build.sh
 source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_finish_build.sh"
 
@@ -433,12 +431,12 @@ source "$TERMUX_SCRIPTDIR/scripts/build/termux_step_finish_build.sh"
 source "$TERMUX_SCRIPTDIR/scripts/properties.sh"
 
 if [[ "$TERMUX_ON_DEVICE_BUILD" == "true" ]]; then
-	# Setup TERMUX_APP_PACKAGE_MANAGER
+	# 设置 TERMUX_APP_PACKAGE_MANAGER
 	# shellcheck source=/dev/null
 	source "$TERMUX_PREFIX/bin/termux-setup-package-manager"
 
-	# For on device builds cross compiling is not supported.
-	# Target architecture must be same as for environment used currently.
+	# 对于设备构建不支持交叉编译
+	# 目标架构必须与当前使用的环境相同
 	case "$TERMUX_APP_PACKAGE_MANAGER" in
 		"apt") TERMUX_ARCH=$(dpkg --print-architecture);;
 		"pacman") TERMUX_ARCH=$(pacman-conf Architecture);;
@@ -446,38 +444,38 @@ if [[ "$TERMUX_ON_DEVICE_BUILD" == "true" ]]; then
 	export TERMUX_ARCH
 fi
 
-# Check if the package is in the compiled list
+# 检查包是否在已编译列表中
 termux_check_package_in_built_packages_list() {
 	[[ ! -f "$TERMUX_BUILD_PACKAGE_CALL_BUILT_PACKAGES_LIST_FILE_PATH" ]] && \
-		termux_error_exit "file '$TERMUX_BUILD_PACKAGE_CALL_BUILT_PACKAGES_LIST_FILE_PATH' not found."
-	# slightly faster than `grep -q $word $file`
+		termux_error_exit "文件 '$TERMUX_BUILD_PACKAGE_CALL_BUILT_PACKAGES_LIST_FILE_PATH' 未找到。"
+	# 比 `grep -q $word $file` 稍微快一点
 	[[ " $(< "$TERMUX_BUILD_PACKAGE_CALL_BUILT_PACKAGES_LIST_FILE_PATH") " == *" $1 "* ]]
 	return $?
 }
 
-# Adds a package to the list of built packages if it is not in the list
+# 如果包不在列表中，则将其添加到已构建包列表
 termux_add_package_to_built_packages_list() {
 	if ! termux_check_package_in_built_packages_list "$1"; then
 		echo -n "$1 " >> "$TERMUX_BUILD_PACKAGE_CALL_BUILT_PACKAGES_LIST_FILE_PATH"
 	fi
 }
 
-# Check if the package is in the compiling list
+# 检查包是否在编译列表中
 termux_check_package_in_building_packages_list() {
 	[[ ! -f "$TERMUX_BUILD_PACKAGE_CALL_BUILDING_PACKAGES_LIST_FILE_PATH" ]] && \
-		termux_error_exit "file '$TERMUX_BUILD_PACKAGE_CALL_BUILDING_PACKAGES_LIST_FILE_PATH' not found."
-	# slightly faster than `grep -q $word $file`
+		termux_error_exit "文件 '$TERMUX_BUILD_PACKAGE_CALL_BUILDING_PACKAGES_LIST_FILE_PATH' 未找到。"
+	# 比 `grep -q $word $file` 稍微快一点
 	[[ $'\n'"$(<"$TERMUX_BUILD_PACKAGE_CALL_BUILDING_PACKAGES_LIST_FILE_PATH")"$'\n' == *$'\n'"$1"$'\n'* ]]
 	return $?
 }
 
-# Configure variables (TERMUX_ARCH, TERMUX__PREFIX__INCLUDE_DIR, TERMUX__PREFIX__LIB_DIR) for multilib-compilation
+# 配置多库编译的变量（TERMUX_ARCH, TERMUX__PREFIX__INCLUDE_DIR, TERMUX__PREFIX__LIB_DIR）
 termux_conf_multilib_vars() {
-	# Change the 64-bit architecture type to its 32-bit counterpart in the `TERMUX_ARCH` variable
+	# 将 64 位架构类型更改为其对应的 32 位类型，在 `TERMUX_ARCH` 变量中
 	case "$TERMUX_ARCH" in
 		"aarch64") TERMUX_ARCH="arm";;
 		"x86_64") TERMUX_ARCH="i686";;
-		*) termux_error_exit "It is impossible to set multilib arch for ${TERMUX_ARCH} arch."
+		*) termux_error_exit "无法为 ${TERMUX_ARCH} 架构设置多库架构。"
 	esac
 	TERMUX__PREFIX__INCLUDE_SUBDIR="$TERMUX__PREFIX__MULTI_INCLUDE_SUBDIR"
 	TERMUX__PREFIX__INCLUDE_DIR="$TERMUX__PREFIX__MULTI_INCLUDE_DIR"
@@ -485,11 +483,11 @@ termux_conf_multilib_vars() {
 	TERMUX__PREFIX__LIB_DIR="$TERMUX__PREFIX__MULTI_LIB_DIR"
 }
 
-# Run functions for normal compilation and multilib-compilation
+# 运行正常编译和多库编译的函数
 termux_run_base_and_multilib_build_step() {
 	case "${1}" in
 		termux_step_configure|termux_step_make|termux_step_make_install) local func="${1}";;
-		*) termux_error_exit "Unsupported function '${1}'."
+		*) termux_error_exit "不支持的函数 '${1}'。"
 	esac
 	cd "$TERMUX_PKG_BUILDDIR"
 	if [[ "$TERMUX_PKG_BUILD_ONLY_MULTILIB" == "false" ]]; then
@@ -503,39 +501,39 @@ termux_run_base_and_multilib_build_step() {
 	fi
 }
 
-# Special hook to prevent use of "sudo" inside package build scripts.
-# build-package.sh shouldn't perform any privileged operations.
+# 特殊钩子，防止在包构建脚本中使用 "sudo"
+# build-package.sh 不应执行任何特权操作
 sudo() {
-	termux_error_exit "Do not use 'sudo' inside build scripts. Build environment should be configured through ./scripts/setup-ubuntu.sh."
+	termux_error_exit "不要在构建脚本中使用 'sudo'。构建环境应通过 ./scripts/setup-ubuntu.sh 配置。"
 }
 
 _show_usage() {
-	echo "Usage: ./build-package.sh [options] PACKAGE_1 PACKAGE_2 ..."
+	echo "用法: ./build-package.sh [选项] PACKAGE_1 PACKAGE_2 ..."
 	echo
-	echo "Build a package by creating a .deb file in the output/ folder."
+	echo "通过在 output/ 文件夹中创建 .deb 文件来构建包"
 	echo
-	echo "Available options:"
-	[[ "$TERMUX_ON_DEVICE_BUILD" = "false" ]] && echo "  -a The architecture to build for: aarch64(default), arm, i686, x86_64 or all."
-	echo "  -c Continue previous build."
-	echo "  -C Cleanup already built packages on low disk space."
-	echo "  -d Build with debug symbols."
-	echo "  -D Build a disabled package in disabled-packages/."
-	echo "  -f Force build even if package has already been built."
-	echo "  -F Force build even if package and its dependencies have already been built."
-	[[ "$TERMUX_ON_DEVICE_BUILD" = "false" ]] && echo "  -i Download and extract dependencies instead of building them."
-	echo "  -I Download and extract dependencies instead of building them, keep existing $TERMUX_BASE_DIR files."
-	echo "  -L The package and its dependencies will be based on the same library."
-	echo "  -q Quiet build."
-	echo "  -Q Loud build -- set -x debug output and function tracing."
-	echo "  -r Remove all package build dependent dirs that '-f/-F'"
-	echo "     flags alone would not remove, like cache dir containing "
-	echo "     package sources and host build dir. Ignored if '-f/-F'"
-	echo "     flags are not passed."
-	echo "  -w Install dependencies without version binding."
-	echo "  -s Skip dependency check."
-	echo "  -o Specify directory where to put built packages. Default: output/"
-	echo "  --format Specify package output format (debian, pacman)."
-	echo "  --library Specify library of package (bionic, glibc)."
+	echo "可用选项:"
+	[[ "$TERMUX_ON_DEVICE_BUILD" = "false" ]] && echo "  -a 要构建的架构: aarch64(默认), arm, i686, x86_64 或 all。"
+	echo "  -c 继续之前的构建"
+	echo "  -C 在磁盘空间不足时清理已构建的包"
+	echo "  -d 使用调试符号构建"
+	echo "  -D 构建 disabled-packages/ 中的已禁用包"
+	echo "  -f 强制构建，即使包已经构建"
+	echo "  -F 强制构建，即使包及其依赖项已经构建"
+	[[ "$TERMUX_ON_DEVICE_BUILD" = "false" ]] && echo "  -i 下载并提取依赖项而不是构建它们"
+	echo "  -I 下载并提取依赖项而不是构建它们，保留现有的 $TERMUX_BASE_DIR 文件"
+	echo "  -L 包及其依赖项将基于相同的库"
+	echo "  -q 静默构建"
+	echo "  -Q 详细构建 -- 设置 -x 调试输出和函数跟踪"
+	echo "  -r 删除所有包构建依赖目录，'-f/-F'"
+	echo "     标志本身不会删除，例如包含"
+	echo "     包源代码和主机构建目录的缓存目录。如果未传递 '-f/-F'"
+	echo "     标志则忽略"
+	echo "  -w 安装没有版本绑定的依赖项"
+	echo "  -s 跳过依赖检查"
+	echo "  -o 指定放置构建包的目录。默认: output/"
+	echo "  --format 指定包输出格式 (debian, pacman)"
+	echo "  --library 指定包的库 (bionic, glibc)"
 	exit 1
 }
 
@@ -548,24 +546,24 @@ while (( $# )); do
 		-h|--help) _show_usage;;
 		--format)
 			if [[ -z "${2-}" ]]; then
-				termux_error_exit "./build-package.sh: option '--format' requires an argument"
+				termux_error_exit "./build-package.sh: 选项 '--format' 需要参数"
 			fi
 			shift 1
 			export TERMUX_PACKAGE_FORMAT="$1"
 		;;
 		--library)
 			if [[ -z "${2-}" ]]; then
-				termux_error_exit "./build-package.sh: option '--library' requires an argument"
+				termux_error_exit "./build-package.sh: 选项 '--library' 需要参数"
 			fi
 			shift 1
 			export TERMUX_PACKAGE_LIBRARY="$1"
 		;;
 		-a)
 			if [[ "$TERMUX_ON_DEVICE_BUILD" == "true" ]]; then
-				termux_error_exit "./build-package.sh: option '-a' is not available for on-device builds"
+				termux_error_exit "./build-package.sh: 选项 '-a' 不支持设备构建"
 			fi
 			if [[ -z "${2-}" ]]; then
-				termux_error_exit "./build-package.sh: option '-a' requires an argument"
+				termux_error_exit "./build-package.sh: 选项 '-a' 需要参数"
 			fi
 			shift 1
 			export TERMUX_ARCH="$1"
@@ -576,7 +574,7 @@ while (( $# )); do
 		-F) TERMUX_FORCE_BUILD_DEPENDENCIES=true && TERMUX_FORCE_BUILD=true;;
 		-i)
 			if [[ "$TERMUX_ON_DEVICE_BUILD" == "true" ]]; then
-				termux_error_exit "./build-package.sh: option '-i' is not available for on-device builds"
+				termux_error_exit "./build-package.sh: 选项 '-i' 不支持设备构建"
 			fi
 			export TERMUX_INSTALL_DEPS=true
 		;;
@@ -592,49 +590,48 @@ while (( $# )); do
 		-s) export TERMUX_SKIP_DEPCHECK=true;;
 		-o)
 			if [[ -z "${2-}" ]]; then
-				termux_error_exit "./build-package.sh: option '-o' requires an argument"
+				termux_error_exit "./build-package.sh: 选项 '-o' 需要参数"
 			fi
 			shift 1
 			TERMUX_OUTPUT_DIR="$(realpath -m "$1")"
 		;;
 		-c) TERMUX_CONTINUE_BUILD=true;;
 		-C) TERMUX_CLEANUP_BUILT_PACKAGES_ON_LOW_DISK_SPACE=true;;
-		-*) termux_error_exit "./build-package.sh: illegal option '$1'";;
+		-*) termux_error_exit "./build-package.sh: 非法选项 '$1'";;
 		*) PACKAGE_LIST+=("$1");;
 	esac
 	shift 1
 done
 unset -f _show_usage
 
-# Dependencies should be used from repo only if they are built for
-# same package name.
+# 依赖项应该仅在它们为相同包名构建时才从仓库使用
 if [[ "$TERMUX_REPO_APP__PACKAGE_NAME" != "$TERMUX_APP_PACKAGE" ]]; then
-	echo "Ignoring -i option to download dependencies since repo package name ($TERMUX_REPO_APP__PACKAGE_NAME) does not equal app package name ($TERMUX_APP_PACKAGE)"
+	echo "忽略 -i 选项以下载依赖项，因为仓库包名 ($TERMUX_REPO_APP__PACKAGE_NAME) 不等于应用包名 ($TERMUX_APP_PACKAGE)"
 	TERMUX_INSTALL_DEPS=false
 fi
 
 case "$TERMUX_REPO_PKG_FORMAT" in
 	debian|pacman) :;;
-	*) termux_error_exit "'pkg_format' is incorrectly specified in repo.json file. Only 'debian' and 'pacman' formats are supported";;
+	*) termux_error_exit "repo.json 文件中错误指定了 'pkg_format'。仅支持 'debian' 和 'pacman' 格式";;
 esac
 
 if [[ -n "${TERMUX_PACKAGE_FORMAT-}" ]]; then
 	case "${TERMUX_PACKAGE_FORMAT-}" in
 		debian|pacman) :;;
-		*) termux_error_exit "Unsupported package format \"${TERMUX_PACKAGE_FORMAT-}\". Only 'debian' and 'pacman' formats are supported";;
+		*) termux_error_exit "不支持的包格式 \"${TERMUX_PACKAGE_FORMAT-}\"。仅支持 'debian' 和 'pacman' 格式";;
 	esac
 fi
 
 if [[ -n "${TERMUX_PACKAGE_LIBRARY-}" ]]; then
 	case "${TERMUX_PACKAGE_LIBRARY-}" in
 		bionic|glibc) :;;
-		*) termux_error_exit "Unsupported library \"${TERMUX_PACKAGE_LIBRARY-}\". Only 'bionic' and 'glibc' library are supported";;
+		*) termux_error_exit "不支持的库 \"${TERMUX_PACKAGE_LIBRARY-}\"。仅支持 'bionic' 和 'glibc' 库";;
 	esac
 fi
 
 if [[ "${TERMUX_INSTALL_DEPS-false}" = "true" || "${TERMUX_PACKAGE_LIBRARY-bionic}" = "glibc" ]]; then
-	# Setup PGP keys for verifying integrity of dependencies.
-	# Keys are obtained from our keyring package.
+	# 设置用于验证依赖项完整性的 PGP 密钥
+	# 密钥从我们的密钥环包获取
 	gpg --list-keys 2C7F29AE97891F6419A9E2CDB0076E490B71616B > /dev/null 2>&1 || {
 		gpg --import "$TERMUX_SCRIPTDIR/packages/termux-keyring/grimler.gpg"
 		gpg --no-tty --command-file <(echo -e "trust\n5\ny") --edit-key 2C7F29AE97891F6419A9E2CDB0076E490B71616B
@@ -650,18 +647,18 @@ if [[ "${TERMUX_INSTALL_DEPS-false}" = "true" || "${TERMUX_PACKAGE_LIBRARY-bioni
 fi
 
 for (( i=0; i < ${#PACKAGE_LIST[@]}; i++ )); do
-	# Following commands must be executed under lock to prevent running
-	# multiple instances of "./build-package.sh".
+	# 以下命令必须在锁下执行以防止运行
+	# "./build-package.sh" 的多个实例
 	#
-	# To provide a sane environment for each package,
-	# builds are done in an explicit subshell for each.
+	# 为每个包提供合理的环境，
+	# 构建在显式的子 shell 中完成
 	# shellcheck disable=SC2031
 	(
 		if [[ "$TERMUX_BUILD_IGNORE_LOCK" != "true" ]]; then
-			flock -n 5 || termux_error_exit "Another build is already running within same environment."
+			flock -n 5 || termux_error_exit "同一环境中已有另一个构建正在运行"
 		fi
 		(
-		# Handle 'all' arch:
+		# 处理 'all' 架构：
 		if [[ "$TERMUX_ON_DEVICE_BUILD" == "false" && -n "${TERMUX_ARCH+x}" && "${TERMUX_ARCH}" == 'all' ]]; then
 			_SELF_ARGS=()
 			[[ "${TERMUX_CLEANUP_BUILT_PACKAGES_ON_LOW_DISK_SPACE:-}" == "true" ]] && _SELF_ARGS+=("-C")
@@ -685,16 +682,16 @@ for (( i=0; i < ${#PACKAGE_LIST[@]}; i++ )); do
 			exit
 		fi
 
-		# Check the package to build:
+		# 检查要构建的包：
 		TERMUX_PKG_NAME="$(basename "${PACKAGE_LIST[i]}")"
 		TERMUX_PKG_BUILDER_DIR=""
 		if [[ ${PACKAGE_LIST[i]} == *"/"* ]]; then
-			# Path to directory which may be outside this repo:
-			if [[ ! -d "${PACKAGE_LIST[i]}" ]]; then termux_error_exit "'${PACKAGE_LIST[i]}' seems to be a path but is not a directory"; fi
+			# 此仓库外目录的路径：
+			if [[ ! -d "${PACKAGE_LIST[i]}" ]]; then termux_error_exit "'${PACKAGE_LIST[i]}' 似乎是路径但不是目录"; fi
 			TERMUX_PKG_BUILDER_DIR="$(realpath "${PACKAGE_LIST[i]}")"
 		else
-			# Package name:
-			# FIXME: TERMUX_PACKAGES_DIRECTORIES should be made into an array.
+			# 包名：
+			# FIXME: TERMUX_PACKAGES_DIRECTORIES 应该被制成数组
 			for package_directory in $TERMUX_PACKAGES_DIRECTORIES; do
 				if [[ -d "${TERMUX_SCRIPTDIR}/${package_directory}/${TERMUX_PKG_NAME}" ]]; then
 					export TERMUX_PKG_BUILDER_DIR="${TERMUX_SCRIPTDIR}/$package_directory/$TERMUX_PKG_NAME"
@@ -705,13 +702,13 @@ for (( i=0; i < ${#PACKAGE_LIST[@]}; i++ )); do
 				fi
 			done
 			if [[ -z "${TERMUX_PKG_BUILDER_DIR}" ]]; then
-				termux_error_exit "No package $TERMUX_PKG_NAME found in any of the enabled repositories. Are you trying to set up a custom repository?"
+				termux_error_exit "在任何启用的仓库中未找到包 $TERMUX_PKG_NAME。您是否尝试设置自定义仓库？"
 			fi
 		fi
 		export TERMUX_PKG_BUILDER_DIR
 		TERMUX_PKG_BUILDER_SCRIPT=$TERMUX_PKG_BUILDER_DIR/build.sh
 		if [[ ! -f "$TERMUX_PKG_BUILDER_SCRIPT" ]]; then
-			termux_error_exit "No build.sh script at package dir $TERMUX_PKG_BUILDER_DIR!"
+			termux_error_exit "包目录 $TERMUX_PKG_BUILDER_DIR 中没有 build.sh 脚本！"
 		fi
 
 		termux_step_setup_variables
@@ -752,8 +749,8 @@ for (( i=0; i < ${#PACKAGE_LIST[@]}; i++ )); do
 			termux_step_pre_configure
 		fi
 
-		# Even on continued build we might need to setup paths
-		# to tools so need to run part of configure step
+		# 即使在继续构建时，我们可能也需要设置路径
+		# 到工具，所以需要运行配置步骤的一部分
 		termux_run_base_and_multilib_build_step termux_step_configure
 
 		if [[ "$TERMUX_CONTINUE_BUILD" == "false" ]]; then
@@ -775,7 +772,7 @@ for (( i=0; i < ${#PACKAGE_LIST[@]}; i++ )); do
 		termux_step_massage
 		cd "$TERMUX_PKG_MASSAGEDIR/$TERMUX_PREFIX_CLASSICAL"
 		termux_step_post_massage
-		# At the final stage (when the package is archiving) it is better to use commands from the system
+		# 在最后阶段（当包归档时）最好使用系统的命令
 		if [[ "$TERMUX_ON_DEVICE_BUILD" = "false" ]]; then
 			export PATH="/usr/bin:$PATH"
 		fi
@@ -783,9 +780,9 @@ for (( i=0; i < ${#PACKAGE_LIST[@]}; i++ )); do
 		case "$TERMUX_PACKAGE_FORMAT" in
 			debian) termux_step_create_debian_package;;
 			pacman) termux_step_create_pacman_package;;
-			*) termux_error_exit "Unknown package format '$TERMUX_PACKAGE_FORMAT'.";;
+			*) termux_error_exit "未知的包格式 '$TERMUX_PACKAGE_FORMAT'。";;
 		esac
-		# Save a list of compiled packages for further work with it
+		# 保存已编译包的列表以供进一步使用
 		if termux_check_package_in_building_packages_list "${TERMUX_PKG_BUILDER_DIR#"${TERMUX_SCRIPTDIR}/"}"; then
 			sed -i "\|^${TERMUX_PKG_BUILDER_DIR#"${TERMUX_SCRIPTDIR}/"}$|d" "$TERMUX_BUILD_PACKAGE_CALL_BUILDING_PACKAGES_LIST_FILE_PATH"
 		fi
@@ -795,7 +792,7 @@ for (( i=0; i < ${#PACKAGE_LIST[@]}; i++ )); do
 	) 5< "$TERMUX_BUILD_LOCK_FILE"
 done
 
-# Removing a file to store a list of compiled packages
+# 删除存储已编译包列表的文件
 if (( ! TERMUX_BUILD_PACKAGE_CALL_DEPTH )); then
 	rm "$TERMUX_BUILD_PACKAGE_CALL_BUILT_PACKAGES_LIST_FILE_PATH"
 	rm "$TERMUX_BUILD_PACKAGE_CALL_BUILDING_PACKAGES_LIST_FILE_PATH"

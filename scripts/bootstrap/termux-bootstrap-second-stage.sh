@@ -14,59 +14,53 @@ function log_error() { echo "[*]" "$@" 1>&2; }
 show_help() {
 
 	cat <<'HELP_EOF'
-@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@ runs the second stage of Termux
-bootstrap installation.
+@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@ 运行 Termux bootstrap 安装的
+第二阶段。
 
 
-Usage:
+用法：
   @TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@
 
 
-Available command_options:
-  [ -h | --help ]    Display this help screen.
+可用的 command_options：
+  [ -h | --help ]    显示此帮助屏幕。
 
 
 
-The Termux app runs the bootstrap installion first stage by extracting
-the bootstrap packages manually to the Termux rootfs directory under
-private app data directory `/data/data/<package_name>` without using
-the package managers like (`apt`/`dpkg` or `pacman`) to install
-packages, as they are also part of the bootstrap.
-Due to manual extraction, package configuration may not be properly
-done, like running of maintainers sciprts like `preinst` and
-`postinst`. Therefore, `@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@` is run after
-extraction to finish package configuration. The output of second stage
-will get logged to Android `logcat` by the app.
+Termux 应用通过手动将 bootstrap 包提取到私有应用数据目录
+`/data/data/<package_name>` 下的 Termux rootfs 目录来运行
+bootstrap 安装第一阶段，而不使用包管理器（如 `apt`/`dpkg` 或 `pacman`）来安装
+包，因为它们也是 bootstrap 的一部分。
+由于手动提取，包配置可能无法正确完成，
+比如运行维护者脚本，如 `preinst` 和
+`postinst`。因此，`@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@` 在
+提取后运行以完成包配置。第二阶段的输出
+将由应用记录到 Android `logcat`。
 
-Currently, only `postinst` scripts are run.
-Running `preinst` scripts is not possible without an actual rootfs,
-and support for running special scripts after extraction would need to
-be written to handle packages that do require it.
+目前，只运行 `postinst` 脚本。
+在没有实际 rootfs 的情况下运行 `preinst` 脚本是不可能的，
+并且需要编写对提取后运行特殊脚本的支持来处理需要它的包。
 
-If maintainer scripts of all packages are executed successfully,
-`@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@` will exit with exit code `0`,
-otherwise with the exit code returned by the last failed script or
-that of any other failure.
+如果所有包的维护者脚本都成功执行，
+`@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@` 将以退出代码 `0` 退出，
+否则以最后失败的脚本返回的退出代码或任何其他失败的退出代码退出。
 
-The second stage can only be run once in the complete lifetime of the
-rootfs and running it again may put the rootfs in an inconsistent
-state, so it is not allowed by default. This is done by creating the
-`@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@.lock` file as a symlink in the
-same directory as `@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@` file as that is
-an atomic operation and only the first instance of
-`@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@` that creates it will be able to run
-the second stage and other instances will fail. The lock file is never
-deleted under normall operation. If rootfs directory is ever wiped,
-then lock file will be deleted along with it as it exists under it,
-and when bootstrap is setup again, second stage will be able to run
-again. The `$TMPDIR` is not used for the lock file as that is often
-deleted in the lifetime of the rootfs. If for some reason, second
-stage must be force run again (not recommended), like in case of
-previous failure and it must be re-run again for testing, then delete
-the lock file manually and run `@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@`
-again.
+第二阶段只能在 rootfs 的整个生命周期中运行一次，
+再次运行可能会使 rootfs 处于不一致的状态，
+因此默认情况下不允许这样做。这是通过创建
+`@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@.lock` 文件作为符号链接来完成的
+在与 `@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@` 文件相同的目录中，
+因为这是一个原子操作，只有
+`@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@` 创建它的第一个实例才能够运行
+第二阶段，其他实例将失败。在正常操作下，锁文件永远不会被删除。
+如果 rootfs 目录被擦除，则锁文件将随之删除，因为它位于其下，
+并且当再次设置 bootstrap 时，第二阶段将能够再次运行。
+`$TMPDIR` 不用于锁文件，因为它通常在 rootfs 的生命周期中被删除。
+如果出于某种原因，必须强制再次运行第二阶段（不推荐），
+例如之前失败的情况，并且必须为了测试再次运行它，那么手动
+删除锁文件并再次运行 `@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@`。
 
-**See also:**
+**另请参阅：**
 - https://github.com/termux/termux-packages/wiki/For-maintainers#bootstraps
 HELP_EOF
 
@@ -106,31 +100,27 @@ run_bootstrap_second_stage() {
 	return_value=$?
 	if [ $return_value -ne 0 ]; then
 		if [ $return_value -eq 1 ] && [[ "$output" == *"File exists"* ]]; then
-			log "The termux bootstrap second stage has already been run before and cannot be run again."
-			log "If you still want to force run it again (not recommended), \
-like in case of previous failure and it must be re-run again for testing, \
-then delete the '@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_DIR@/@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@.lock' \
-file manually and run '@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@' again."
+			log "Termux bootstrap 第二阶段之前已经运行过，无法再次运行。"
+			log "如果您仍然想强制再次运行它（不推荐），例如在之前失败的情况下，并且必须为了测试再次运行它，那么手动删除 '@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_DIR@/@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@.lock' 文件并再次运行 '@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@'。"
 			return 0
 		else
 			log_error "$output"
-			log_error "Failed to create lock file for termux bootstrap second stage at \
-'@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_DIR@/@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@.lock'"
+			log_error "无法在 '@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_DIR@/@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@.lock' 为 termux bootstrap 第二阶段创建锁文件"
 			warn_if_process_killed "$return_value" "ln"
 			return $return_value
 		fi
 	fi
 
 
-	log "Running termux bootstrap second stage"
+	log "正在运行 termux bootstrap 第二阶段"
 	run_bootstrap_second_stage_inner
 	return_value=$?
 	if [ $return_value -ne 0 ]; then
-		log_error "Failed to run termux bootstrap second stage"
+		log_error "运行 termux bootstrap 第二阶段失败"
 		return $return_value
 	fi
 
-	log "The termux bootstrap second stage completed successfully"
+	log "Termux bootstrap 第二阶段已成功完成"
 
 
 	return 0
@@ -141,11 +131,11 @@ run_bootstrap_second_stage_inner() {
 
 	local return_value
 
-	log "Running postinst maintainer scripts"
+	log "正在运行 postinst 维护者脚本"
 	run_package_postinst_maintainer_scripts
 	return_value=$?
 	if [ $return_value -ne 0 ]; then
-		log_error "Failed to run postinst maintainer scripts"
+		log_error "运行 postinst 维护者脚本失败"
 		return $return_value
 	fi
 
@@ -175,14 +165,14 @@ run_package_postinst_maintainer_scripts() {
 
 			dpkg_version=$(dpkg --version | head -n 1 | sed -E 's/.*version ([^ ]+) .*/\1/')
 			if [[ ! "$dpkg_version" =~ ^[0-9].*$ ]]; then
-				log_error "Failed to find the 'dpkg' version"
+				log_error "无法找到 'dpkg' 版本"
 				log_error "$dpkg_version"
 				return 1
 			fi
 
-			# Check `dpkg --force-help` for current defaults.
-			# If they ever change, this will need to be updated.
-			# Currently, we are not parsing command output.
+			# 检查 `dpkg --force-help` 获取当前默认值。
+			# 如果它们更改，这将需要更新。
+			# 目前，我们不解析命令输出。
 			# - https://manpages.debian.org/testing/dpkg/dpkg.1.en.html#force~2
 			local dpkg_force_things="security-mac,downgrade"
 
@@ -202,30 +192,25 @@ run_package_postinst_maintainer_scripts() {
 				script_basename="${script_path##*/}"
 				package_name="${script_basename::-9}"
 
-				log "Running '$package_name' package postinst"
+				log "正在运行 '$package_name' 包的 postinst"
 
-				# Execute permissions do not exist for maintainer
-				# scripts in bootstrap zips and since files are
-				# extracted manually by termux-app, they need to be
-				# assigned here, like `dpkg` does.
+				# Bootstrap zip 中的维护者脚本没有执行权限，
+				# 并且由于文件是由 termux-app 手动提取的，
+				# 它们需要在这里分配权限，就像 `dpkg` 做的那样。
 				chmod u+x "$script_path" || return $?
 
 				(
-					# As per `dpkg` `script.c`:
-					# >Switch to a known good directory to give the
-					# >maintainer script a saner environment.
-					# The current working directory is handled the
-					# following way:
-					# - By default rootfs `/` is used.
-					# - If `$DPKG_ROOT` is set to an alternate rootfs
-					#   path:
-					#   - If `--force-script-chrootless` flag is not
-					#     passed, then `$DPKG_ROOT` is chrooted into
-					#     and then the current working directory is
-					#     changed to `/`.
-					#   - If flag is passed, then chroot is not done
-					#     and only the current working directory is
-					#     changed to `$DPKG_ROOT`.
+					# 根据 `dpkg` `script.c`：
+					# >切换到一个已知良好的目录，为维护者脚本
+					# >提供一个更健全的环境。
+					# 当前工作目录的处理方式如下：
+					# - 默认情况下使用 rootfs `/`。
+					# - 如果设置了 `$DPKG_ROOT` 为备用 rootfs 路径：
+					#   - 如果未传递 `--force-script-chrootless` 标志，
+					#     则 chroot 进入 `$DPKG_ROOT`，然后将当前工作
+					#     目录更改为 `/`。
+					#   - 如果传递了该标志，则不进行 chroot，
+					#     仅将当前工作目录更改为 `$DPKG_ROOT`。
 					# - https://github.com/guillemj/dpkg/blob/1.22.6/src/main/script.c#L99-L130
 					# - https://github.com/guillemj/dpkg/blob/1.22.6/lib/dpkg/fsys-dir.c#L86
 					# - https://github.com/guillemj/dpkg/blob/1.22.6/lib/dpkg/fsys-dir.c#L33
@@ -233,23 +218,19 @@ run_package_postinst_maintainer_scripts() {
 					# - https://github.com/guillemj/dpkg/blob/1.22.6/src/common/force.c#L348
 					# - https://manpages.debian.org/unstable/dpkg/dpkg.1.en.html#DPKG_FORCE
 					# - https://wiki.debian.org/Teams/Dpkg/Spec/InstallBootstrap#Detached_chroot_handling
-					# Termux by default does not set `$DPKG_ROOT` and
-					# does not pass the `--force-script-chrootless`
-					# flag, so only current working directory is
-					# changed to the Android rootfs `/`.
-					# Moreover, Android apps cannot run chroot
-					# without root access, so `$DPKG_ROOT` cannot be
-					# normally used without `--force-script-chrootless`
-					# flag.
-					# Note that Termux rootfs is under private app
-					# data directory `/data/data/<package_name>,`
-					# which may cause problems for packages which try
-					# to use Android rootfs paths instead of Termux
-					# rootfs paths.
+					# Termux 默认不设置 `$DPKG_ROOT` 且不传递
+					# `--force-script-chrootless` 标志，因此仅将
+					# 当前工作目录更改为 Android rootfs `/`。
+					# 此外，Android 应用无法在没有 root 访问权限
+					# 的情况下运行 chroot，因此 `$DPKG_ROOT` 无法
+					# 在没有 `--force-script-chrootless` 标志的情况下正常使用。
+					# 注意 Termux rootfs 位于私有应用数据目录
+					# `/data/data/<package_name>,`，这可能会对尝试
+					# 使用 Android rootfs 路径而不是 Termux rootfs
+					# 路径的包造成问题。
 					cd / || exit $?
 
-					# Export internal environment variables that
-					# `dpkg` exports for maintainer scripts.
+					# 导出 `dpkg` 为维护者脚本导出的内部环境变量。
 					# - https://manpages.debian.org/testing/dpkg/dpkg.1.en.html#Internal_environment
 					# - https://github.com/guillemj/dpkg/blob/1.22.6/src/main/main.c#L751-L759
 					# - https://github.com/guillemj/dpkg/blob/1.22.6/src/main/script.c#L191-L197
@@ -263,21 +244,18 @@ run_package_postinst_maintainer_scripts() {
 					export DPKG_ADMINDIR="${TERMUX_PREFIX}/var/lib/dpkg"
 					export DPKG_ROOT=""
 
-					# > The maintainer scripts must be proper executable
-					# > files; if they are scripts (which is recommended),
-					# > they must start with the usual `#!` convention.
-					# Execute it directly instead of with a shell,
-					# and exit with failure if it fails as that
-					# implies that bootstrap setup failed.
-					# The first argument is `configure`.
-					# The package version is the second argument
-					# if package is being upgraded, but not for first
-					# installation, so don't pass it.
-					# Check `deb-postinst(5)` for more info.
+					# > 维护者脚本必须是正确的可执行文件；
+					# > 如果它们是脚本（推荐），必须以常规的 `#!` 约定开始。
+					# 直接执行它而不是使用 shell，
+					# 如果失败则退出并返回错误，因为这暗示 bootstrap 设置失败。
+					# 第一个参数是 `configure`。
+					# 如果包正在升级，包版本是第二个参数，
+					# 但对于首次安装不是，所以不传递它。
+					# 检查 `deb-postinst(5)` 以获取更多信息。
 					"$script_path" configure
 					return_value=$?
 					if [ $return_value -ne 0 ]; then
-						log_error "Failed to run '$package_name' package postinst"
+						log_error "无法运行 '$package_name' 包的 postinst"
 						exit $return_value
 					fi
 				) || return $?
@@ -291,38 +269,37 @@ run_package_postinst_maintainer_scripts() {
 		# - https://wiki.archlinux.org/title/PKGBUILD#install
 		# - https://gitlab.archlinux.org/pacman/pacman/-/blob/v6.1.0/lib/libalpm/add.c#L638-L647
 		if [ -d "${TERMUX_PREFIX}/var/lib/pacman/local" ]; then
-			# Package install files exist at `/var/lib/pacman/local/package-version/install`
+			# 包安装文件位于 `/var/lib/pacman/local/package-version/install`
 			for script_path in "${TERMUX_PREFIX}/var/lib/pacman/local/"*/install; do
 				package_dir="${script_path::-8}"
 				package_dir_basename="${package_dir##*/}"
 
-				# Extract package `version` in the format `epoch:pkgver-pkgrel`
-				# from the package_dir_basename in the format `package-version`.
-				# Do not use external programs to parse as that would require
-				# adding it as a dependency for second-stage.
+				# 从格式为 `package-version` 的 package_dir_basename 中
+				# 提取格式为 `epoch:pkgver-pkgrel` 的包 `version`。
+				# 不要使用外部程序进行解析，因为那需要将其作为
+				# 第二阶段的依赖项添加。
 				# - https://wiki.archlinux.org/title/PKGBUILD#Version
-				# Set to anything after last dash "-"
+				# 设置为最后一个破折号 "-" 之后的所有内容
 				local package_version_pkgrel="${package_dir_basename##*-}"
-				# Set to anything before and including last dash "-"
+				# 设置为最后一个破折号 "-" 之前和包括它的所有内容
 				local package_name_and_version_pkgver="${package_dir_basename%"$package_version_pkgrel"}"
-				# Trim trailing dash "-"
+				# 去除末尾的破折号 "-"
 				package_name_and_version_pkgver="${package_name_and_version_pkgver%?}"
-				# Set to anything after last dash "-"
+				# 设置为最后一个破折号 "-" 之后的所有内容
 				local package_version_pkgver="${package_name_and_version_pkgver##*-}"
-				# Combine pkgver and pkgrel
+				# 设置 pkgver 和 pkgrel
 				package_version="$package_version_pkgver-$package_version_pkgrel"
 				if [[ ! "$package_version" =~ ^([0-9]+:)?[^-]+-[^-]+$ ]]; then
-					log_error "The package_version '$package_version' extracted from package_dir_basename '$package_dir_basename' is not valid"
+					log_error "从 package_dir_basename '$package_dir_basename' 提取的 package_version '$package_version' 无效"
 					return 1
 				fi
 
-				log "Running '$package_dir_basename' package post_install"
+				log "正在运行 '$package_dir_basename' 包的 post_install"
 
 				(
-					# As per `pacman` install docs:
-					# > Each function is run chrooted inside the pacman install directory. See this thread.
-					# The `RootDir` is chrooted into and then the
-					# current working directory is changed to `/`.
+					# 根据 `pacman` 安装文档：
+					# > 每个函数都在 pacman 安装目录内以 chroot 方式运行。请参阅此线程。
+					# `RootDir` 被进入 chroot，然后当前工作目录更改为 `/`。
 					# - https://bbs.archlinux.org/viewtopic.php?pid=913891
 					# - https://man.archlinux.org/man/pacman.conf.5.en#OPTIONS
 					# - https://gitlab.archlinux.org/pacman/pacman/-/blob/v6.1.0/src/pacman/conf.c#L855
@@ -330,45 +307,38 @@ run_package_postinst_maintainer_scripts() {
 					# - https://gitlab.archlinux.org/pacman/pacman/-/blob/v6.1.0/lib/libalpm/alpm.h#L1663-L1676
 					# - https://gitlab.archlinux.org/pacman/pacman/-/blob/v6.1.0/lib/libalpm/util.c#L657-L668
 					# - https://man7.org/linux/man-pages/man2/chroot.2.html
-					# But since Android apps cannot run chroot
-					# without root access, chroot is disabled by
-					# Termux pacman package and only current working
-					# directory is changed to the Android rootfs `/`.
-					# Note that Termux rootfs is under private app
-					# data directory `/data/data/<package_name>,`
-					# which may cause problems for packages which try
-					# to use Android rootfs paths instead of Termux
-					# rootfs paths.
+					# 但由于 Android 应用无法在没有 root 访问权限的情况下运行 chroot，
+					# chroot 被 Termux pacman 包禁用，只有当前工作目录更改为 Android rootfs `/`。
+					# 注意 Termux rootfs 位于私有应用数据目录 `/data/data/<package_name>,`
+					# 这可能会对尝试使用 Android rootfs 路径而不是 Termux rootfs 路径的包造成问题。
 					# - https://github.com/termux/termux-packages/blob/953b9f2aac0dc94f3b99b2df6af898e0a95d5460/packages/pacman/util.c.patch
 					cd "/" || exit $?
 
-					# Source the package `install` file and execute
-					# `post_install` function if defined.
+					# Source 包的 `install` 文件并执行 `post_install` 函数（如果已定义）。
 
-					# Unset function if already defined in the env
+					# 如果环境中已定义函数，则取消设置
 					unset -f post_install || exit $?
 
 					# shellcheck disable=SC1090
 					source "$script_path"
 					return_value=$?
 					if [ $return_value -ne 0 ]; then
-						log_error "Failed to source '$package_dir_basename' package install install"
+						log_error "无法 source '$package_dir_basename' 包的 install 文件"
 						exit $return_value
 					fi
 
 					if [[ "$(type -t post_install 2>/dev/null)" == "function" ]]; then
-						# cd again in case install file sourced changed the directory.
+						# 再次 cd，以防 install 源文件更改了目录。
 						cd "/" || exit $?
 
-						# Execute the post_install function and exit
-						# with failure if it fails as that implies
-						# that bootstrap setup failed.
-						# The package version is the first argument.
-						# Check `PKGBUILD#install` docs for more info.
+						# 执行 post_install 函数并在失败时退出
+						# 因为这暗示 bootstrap 设置失败。
+						# 包版本是第一个参数。
+						# 检查 `PKGBUILD#install` 文档以获取更多信息。
 						post_install "$package_version"
 						return_value=$?
 						if [ $return_value -ne 0 ]; then
-							log_error "Failed to run '$package_dir_basename' package post_install"
+							log_error "无法运行 '$package_dir_basename' 包的 post_install"
 							exit $return_value
 						fi
 					fi
@@ -391,37 +361,34 @@ ensure_running_with_termux_uid() {
 
 	local uid
 
-	# Find current effective uid
+	# 查找当前有效的 uid
 	uid="$(id -u 2>&1)"
 	return_value=$?
 	if [ $return_value -ne 0 ]; then
 		log_error "$uid"
-		log_error "Failed to get uid of the user running the '@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@' script"
+		log_error "无法获取运行 '@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@' 脚本的用户的 uid"
 		warn_if_process_killed "$return_value" "uid"
-		# This gets triggered if `adb install -r --abi arm64-v8a termux-app_v*_universal.apk`
-		# is used to install Termux on a `x86_64` Android AVD where `getprop ro.product.cpu.abilist`
-		# returns `x86_64,arm64-v8a`, but only `x86_64` bootstrap zip should have been extracted
-		# to APK native lib directory and installed to rootfs.
-		# Commands do work if full path is executed in the shell, but some will fail with following
-		# error if only the `basename` of commands is used to rely on `$PATH`.
+		# 如果使用 `adb install -r --abi arm64-v8a termux-app_v*_universal.apk`
+		# 将 Termux 安装在 `x86_64` Android AVD 上，其中 `getprop ro.product.cpu.abilist`
+		# 返回 `x86_64,arm64-v8a`，但只有 `x86_64` bootstrap zip 应该已被提取
+		# 到 APK 原生 lib 目录并安装到 rootfs，则会触发此操作。
+		# 如果在 shell 中执行完整路径，命令可以正常工作，但如果仅使用 `basename`
+		# 依赖 `$PATH` 的命令，则会失败并出现以下错误。
 		if [[ "$uid" == *"Unable to get realpath of id"* ]]; then
-			log_error "You have likely installed the wrong ABI/architecture variant \
-of the @TERMUX_APP__NAME@ app APK that is not compatible with the device."
-			log_error "Uninstall and reinstall the correct APK variant of the @TERMUX_APP__NAME@ app."
-			log_error "Install 'universal' variant if you do not know the correct \
-ABI/architecture of the device."
+			log_error "您可能安装了与设备不兼容的错误 ABI/架构变体"
+			log_error "的 @TERMUX_APP__NAME@ 应用 APK。卸载并重新安装正确的 @TERMUX_APP__NAME@ 应用 APK 变体。"
+			log_error "如果您不知道设备的正确 ABI/架构，请安装 'universal' 变体。"
 		fi
 		return $return_value
 	fi
 
 	if [[ ! "$uid" =~ ^[0-9]+$ ]]; then
-		log_error "The uid '$uid' returned by 'id -u' command is not valid."
+		log_error "'id -u' 命令返回的 uid '$uid' 无效。"
 		return 1
 	fi
 
 	if [[ -n "$TERMUX__UID" ]] && [[ "$uid" != "$TERMUX__UID" ]]; then
-		log_error "@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@ cannot be run as the uid '$uid' and \
-it must be run as the TERMUX__UID '$TERMUX__UID' exported by the @TERMUX_APP__NAME@ app."
+		log_error "@TERMUX_BOOTSTRAP__BOOTSTRAP_SECOND_STAGE_ENTRY_POINT_SUBFILE@ 不能以 uid '$uid' 运行，\ 必须以 @TERMUX_APP__NAME@ 应用导出的 TERMUX__UID '$TERMUX__UID' 运行。"
 		return 1
 	fi
 
@@ -435,9 +402,9 @@ warn_if_process_killed() {
 	local command="${2:-}"
 
 	if [[ "$return_value" == "137" ]]; then
-		log_error "The '$command' command was apparently killed with SIGKILL (signal 9). \
-This may have been due to the security policies of the Android OS installed on your device.
-Check https://github.com/termux/termux-app/issues/4219 for more info."
+		log_error "'$command' 命令似乎被 SIGKILL（信号 9）终止。\\
+这可能是由于您设备上安装的 Android 操作系统的安全策略造成的。
+查看 https://github.com/termux/termux-app/issues/4219 获取更多信息。"
 		return 0
 	fi
 
@@ -449,18 +416,19 @@ Check https://github.com/termux/termux-app/issues/4219 for more info."
 
 
 
-# If running in bash, run script logic, otherwise exit with usage error
+
+# 如果在 bash 中运行，则运行脚本逻辑，否则退出并显示使用错误
 if [ -n "${BASH_VERSION:-}" ]; then
-	# If script is sourced, return with error, otherwise call main function
+	# 如果脚本被 source，则返回错误，否则调用 main 函数
 	# - https://stackoverflow.com/a/28776166/14686958
 	# - https://stackoverflow.com/a/29835459/14686958
 	if (return 0 2>/dev/null); then
-		echo "${0##*/} cannot be sourced as \"\$0\" is required." 1>&2
+		echo "${0##*/} 不能被 source，因为需要 \"\$0\"。" 1>&2
 		return 64 # EX__USAGE
 	else
 		main "$@"
 		exit $?
 	fi
 else
-	(echo "${0##*/} must be run with the bash shell."; exit 64) # EX__USAGE
+	(echo "${0##*/} 必须使用 bash shell 运行。"; exit 64) # EX__USAGE
 fi

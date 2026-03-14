@@ -1,17 +1,17 @@
 termux_create_pacman_subpackages() {
-	# Sub packages:
+	# 子包：
 	local _ADD_PREFIX=""
 	if [[ "$TERMUX_PACKAGE_LIBRARY" == 'glibc' ]]; then
 		_ADD_PREFIX="glibc/"
 	fi
 	if [[ "$TERMUX_PKG_NO_STATICSPLIT" == 'false' && -n "$(shopt -s globstar; shopt -s nullglob; echo ${_ADD_PREFIX}lib{,32}/**/*.a)" ]]; then
-		# Add virtual -static sub package if there are include files:
+		# 如果有包含文件，则添加虚拟 -static 子包：
 		local _STATIC_SUBPACKAGE_FILE=$TERMUX_PKG_TMPDIR/${TERMUX_PKG_NAME}-static.subpackage.sh
 		echo TERMUX_SUBPKG_INCLUDE=\"$(find ${_ADD_PREFIX}lib{,32} -name '*.a' -o -name '*.la' 2> /dev/null) $TERMUX_PKG_STATICSPLIT_EXTRA_PATTERNS\" > "$_STATIC_SUBPACKAGE_FILE"
 		echo "TERMUX_SUBPKG_DESCRIPTION=\"Static libraries for ${TERMUX_PKG_NAME}\"" >> "$_STATIC_SUBPACKAGE_FILE"
 	fi
 
-	# Now build all sub packages
+	# 现在构建所有子包
 	rm -Rf "$TERMUX_TOPDIR/$TERMUX_PKG_NAME/subpackages"
 	for subpackage in $TERMUX_PKG_BUILDER_DIR/*.subpackage.sh $TERMUX_PKG_TMPDIR/*subpackage.sh; do
 		[[ -f "$subpackage" ]] || continue
@@ -47,14 +47,14 @@ termux_create_pacman_subpackages() {
 		# shellcheck source=/dev/null
 		source "$subpackage"
 
-		# Do not create subpackage for specific arches.
-		# Using TERMUX_ARCH instead of SUB_PKG_ARCH (defined below) is intentional.
+		# 不为特定架构创建子包。
+		# 使用 TERMUX_ARCH 而不是 SUB_PKG_ARCH（在下面定义）是有意的。
 		if [[ " ${TERMUX_SUBPKG_EXCLUDED_ARCHES//,/ } " == *" ${TERMUX_ARCH} "* ]]; then
 			echo "Skipping creating subpackage '$SUB_PKG_NAME' for arch $TERMUX_ARCH"
 			continue
 		fi
 
-		# Allow globstar (i.e. './**/') patterns.
+		# 允许 globstar（即 './**/'）模式。
 		shopt -s globstar
 		for includeset in $TERMUX_SUBPKG_INCLUDE; do
 			local _INCLUDE_DIRSET
@@ -62,7 +62,7 @@ termux_create_pacman_subpackages() {
 			[[ "$_INCLUDE_DIRSET" == "." ]] && _INCLUDE_DIRSET=""
 
 			if [[ -e "$includeset" || -L "$includeset" ]]; then
-				# Add the -L clause to handle relative symbolic links:
+				# 添加 -L 子句以处理相对符号链接：
 				mkdir -p "$SUB_PKG_MASSAGE_DIR/$_INCLUDE_DIRSET"
 				mv "$includeset" "$SUB_PKG_MASSAGE_DIR/$_INCLUDE_DIRSET"
 			fi
@@ -73,7 +73,7 @@ termux_create_pacman_subpackages() {
 		[[ "$TERMUX_SUBPKG_PLATFORM_INDEPENDENT" == "true" ]] && SUB_PKG_ARCH=any
 
 		cd "$SUB_PKG_DIR/massage"
-		# Check that files were actually installed, else don't subpackage.
+		# 检查文件是否实际已安装，否则不进行子包化。
 		if [[ "$SUB_PKG_ARCH" == "any" && "$(find . -type f -print | head -n1)" == "" ]]; then
 			echo "No files in subpackage '$SUB_PKG_NAME' when built for $SUB_PKG_ARCH with package '$TERMUX_PKG_NAME', so"
 			echo "the subpackage was not created. If unexpected, check to make sure the files are where you expect."
@@ -90,8 +90,8 @@ termux_create_pacman_subpackages() {
 		case "$TERMUX_SUBPKG_DEPEND_ON_PARENT" in
 			'unversioned') TERMUX_SUBPKG_DEPENDS+=", $TERMUX_PKG_NAME";;
 			'deps')        TERMUX_SUBPKG_DEPENDS+=", $TERMUX_PKG_DEPENDS";;
-			# TODO: pacman does support versioned dependencies
-			# but we are not currently translating the .DEB notation to pacman's
+			# TODO: pacman 确实支持版本化依赖
+			# 但我们目前没有将 .DEB 表示法转换为 pacman 的
 			'true')        TERMUX_SUBPKG_DEPENDS+=", $TERMUX_PKG_NAME";;
 			*) ;;
 		esac
@@ -155,7 +155,7 @@ termux_create_pacman_subpackages() {
 			fi
 		} > .PKGINFO
 
-		# Build metadata.
+		# 构建元数据。
 		{
 			echo "format = 2"
 			echo "pkgname = $SUB_PKG_NAME"
@@ -166,12 +166,12 @@ termux_create_pacman_subpackages() {
 			echo "builddate = $SOURCE_DATE_EPOCH"
 		} > .BUILDINFO
 
-		# Write package installation hooks.
+		# 写入包安装钩子。
 		termux_step_create_subpkg_debscripts
 		termux_step_create_python_debscripts
 		termux_step_create_pacman_install_hook
 
-		# Configuring the selection of a copress for a batch.
+		# 配置批处理的压缩选择。
 		local COMPRESS
 		local PKG_FORMAT
 		case $TERMUX_PACMAN_PACKAGE_COMPRESSION in
@@ -201,10 +201,10 @@ termux_create_pacman_subpackages() {
 				PKG_FORMAT="xz";;
 		esac
 
-		# ensure all elements of the package have the same mtime
+		# 确保包的所有元素具有相同的 mtime
 		find . -exec touch -h -d @$SOURCE_DATE_EPOCH {} +
 
-		# Create the actual .pkg file:
+		# 创建实际的 .pkg 文件：
 		local TERMUX_SUBPKG_PACMAN_FILE=$TERMUX_OUTPUT_DIR/${SUB_PKG_NAME}${DEBUG}-${TERMUX_PKG_FULLVERSION_FOR_PACMAN}-${SUB_PKG_ARCH}.pkg.tar.${PKG_FORMAT}
 		shopt -s dotglob globstar
 		printf '%s\0' **/* | bsdtar -cnf - --format=mtree \
@@ -216,7 +216,7 @@ termux_create_pacman_subpackages() {
 			$COMPRESS > "$TERMUX_SUBPKG_PACMAN_FILE"
 		shopt -u dotglob globstar
 
-		# Go back to main package:
+		# 返回主包：
 		cd "$TERMUX_PKG_MASSAGEDIR/$TERMUX_PREFIX_CLASSICAL"
 	done
 }

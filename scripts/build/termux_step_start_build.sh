@@ -1,25 +1,24 @@
 termux_step_start_build() {
 	# shellcheck source=/dev/null
 	source "$TERMUX_PKG_BUILDER_SCRIPT"
-	# Path to hostbuild marker, for use if package has hostbuild step
+	# 主机构建标记的路径，供包有主机构建步骤时使用
 	TERMUX_HOSTBUILD_MARKER="$TERMUX_PKG_HOSTBUILD_DIR/TERMUX_BUILT_FOR_$TERMUX_PKG_VERSION"
 
 	if [ "$TERMUX_PKG_METAPACKAGE" = "true" ]; then
-		# Metapackage has no sources
+		# 元包没有源代码
 		TERMUX_PKG_SKIP_SRC_EXTRACT=true
-		# Usually metapackages are also platform dependent but it is not always the
-		# right decision to mark them as such when they depend on packages which may
-		# not be available for all architectures
+		# 通常元包也是依赖于平台的，但当它们依赖于可能不适用于所有架构的包时，
+		# 将它们标记为这样并不总是正确的决定
 		# TERMUX_PKG_PLATFORM_INDEPENDENT=true
 	fi
 
 	if [ -n "${TERMUX_PKG_EXCLUDED_ARCHES:=""}" ] && [ "$TERMUX_PKG_EXCLUDED_ARCHES" != "${TERMUX_PKG_EXCLUDED_ARCHES/$TERMUX_ARCH/}" ]; then
-		echo "Skipping building $TERMUX_PKG_NAME for arch $TERMUX_ARCH"
+		echo "跳过为架构 $TERMUX_ARCH 构建 $TERMUX_PKG_NAME"
 		exit 0
 	fi
 
 	if [ -n "$TERMUX_PKG_PYTHON_COMMON_BUILD_DEPS" ] || [[ "$TERMUX_ON_DEVICE_BUILD" = "false" && -n "$TERMUX_PKG_PYTHON_CROSS_BUILD_DEPS" ]] || [[ "$TERMUX_ON_DEVICE_BUILD" = "true" && -n "$TERMUX_PKG_PYTHON_TARGET_DEPS" ]]; then
-		# Enable python setting
+		# 启用 python 设置
 		TERMUX_PKG_SETUP_PYTHON=true
 	fi
 	if [ -z "$TERMUX_PKG_PYTHON_RUNTIME_DEPS" ]; then
@@ -31,10 +30,10 @@ termux_step_start_build() {
 
 	TERMUX_PKG_FULLVERSION=$TERMUX_PKG_VERSION
 	if [ "$TERMUX_PKG_REVISION" != "0" ] || [ "$TERMUX_PKG_FULLVERSION" != "${TERMUX_PKG_FULLVERSION/-/}" ]; then
-		# "0" is the default revision, so only include it if the upstream versions contains "-" itself
+		# "0" 是默认修订版，因此仅当上游版本本身包含 "-" 时才包括它
 		TERMUX_PKG_FULLVERSION+="-$TERMUX_PKG_REVISION"
 	fi
-	# full format version for pacman
+	# pacman 的完整格式版本
 	local TERMUX_PKG_VERSION_EDITED=${TERMUX_PKG_VERSION//-/.}
 	local INCORRECT_SYMBOLS=$(echo $TERMUX_PKG_VERSION_EDITED | grep -o '[0-9][a-z]')
 	if [ -n "$INCORRECT_SYMBOLS" ]; then
@@ -51,7 +50,7 @@ termux_step_start_build() {
 		if [ "$TERMUX_PKG_HAS_DEBUG" = "true" ]; then
 			DEBUG="-dbg"
 		else
-			echo "Skipping building debug build for $TERMUX_PKG_NAME"
+			echo "跳过为 $TERMUX_PKG_NAME 构建调试版本"
 			exit 0
 		fi
 	else
@@ -61,12 +60,12 @@ termux_step_start_build() {
 	if [ "$TERMUX_DEBUG_BUILD" = "false" ] && [ "$TERMUX_FORCE_BUILD" = "false" ]; then
 		if [ -e "$TERMUX_BUILT_PACKAGES_DIRECTORY/$TERMUX_PKG_NAME" ] &&
 			[ "$(cat "$TERMUX_BUILT_PACKAGES_DIRECTORY/$TERMUX_PKG_NAME")" = "$TERMUX_PKG_FULLVERSION" ]; then
-			echo "$TERMUX_PKG_NAME@$TERMUX_PKG_FULLVERSION built - skipping (rm $TERMUX_BUILT_PACKAGES_DIRECTORY/$TERMUX_PKG_NAME to force rebuild)"
+			echo "$TERMUX_PKG_NAME@$TERMUX_PKG_FULLVERSION 已构建 - 跳过（rm $TERMUX_BUILT_PACKAGES_DIRECTORY/$TERMUX_PKG_NAME 以强制重新构建）"
 			exit 0
 		elif [ "$TERMUX_ON_DEVICE_BUILD" = "true" ] &&
 			([[ "$TERMUX_APP_PACKAGE_MANAGER" = "apt" && "$(dpkg-query -W -f '${db:Status-Status} ${Version}\n' "$TERMUX_PKG_NAME" 2>/dev/null)" = "installed $TERMUX_PKG_FULLVERSION" ]] ||
 			 [[ "$TERMUX_APP_PACKAGE_MANAGER" = "pacman" && "$(pacman -Q $TERMUX_PKG_NAME 2>/dev/null)" = "$TERMUX_PKG_NAME $TERMUX_PKG_FULLVERSION_FOR_PACMAN" ]]); then
-			echo "$TERMUX_PKG_NAME@$TERMUX_PKG_FULLVERSION installed - skipping"
+			echo "$TERMUX_PKG_NAME@$TERMUX_PKG_FULLVERSION 已安装 - 跳过"
 			exit 0
 		fi
 	fi
@@ -78,10 +77,10 @@ termux_step_start_build() {
 		TERMUX_PKG_BUILD_ONLY_MULTILIB=true
 	fi
 
-	echo "termux - building $TERMUX_PKG_NAME for arch $TERMUX_ARCH..."
+	echo "termux - 正在为架构 $TERMUX_ARCH 构建 $TERMUX_PKG_NAME..."
 	test -t 1 && printf "\033]0;%s...\007" "$TERMUX_PKG_NAME"
 
-	# Avoid exporting PKG_CONFIG_LIBDIR until after termux_step_host_build.
+	# 在 termux_step_host_build 之前避免导出 PKG_CONFIG_LIBDIR。
 	termux_step_setup_pkg_config_libdir
 
 	local TERMUX_PKG_BUILDDIR_ORIG="$TERMUX_PKG_BUILDDIR"
@@ -89,34 +88,33 @@ termux_step_start_build() {
 		TERMUX_PKG_BUILDDIR=$TERMUX_PKG_SRCDIR
 	fi
 	if [ "$TERMUX_PKG_BUILD_MULTILIB" = "true" ] && [ "$TERMUX_PKG_BUILD_ONLY_MULTILIB" = "false" ] && ([ "$TERMUX_PKG_BUILD_IN_SRC" = "true" ] || [ "$TERMUX_PKG_MULTILIB_BUILDDIR" = "$TERMUX_PKG_BUILDDIR" ]); then
-		termux_error_exit "It is not possible to build 32-bit and 64-bit versions of a package in one place, the build location must be separate."
+		termux_error_exit "无法在一个地方构建包的 32 位和 64 位版本，构建位置必须分开。"
 	fi
 
 	if [ "$TERMUX_CONTINUE_BUILD" == "true" ]; then
-		# If the package has a hostbuild step, verify that it has been built
+		# 如果包有主机构建步骤，请验证它已构建
 		if [ "$TERMUX_PKG_HOSTBUILD" == "true" ] && [ ! -f "$TERMUX_HOSTBUILD_MARKER" ]; then
-			termux_error_exit "Cannot continue this build, hostbuilt tools are missing"
+			termux_error_exit "无法继续此构建，缺少主机构建的工具"
 		fi
 
-		# Set TERMUX_ELF_CLEANER for on-device continued build
+		# 为设备上继续构建设置 TERMUX_ELF_CLEANER
 		if [ "$TERMUX_PACKAGE_LIBRARY" = "bionic" ] && [ "$TERMUX_ON_DEVICE_BUILD" = "true" ]; then
 			TERMUX_ELF_CLEANER="$(command -v termux-elf-cleaner)"
 		fi
-		# The rest in this function can be skipped when doing
-		# a continued build
+		# 在进行继续构建时，可以跳过此函数中的其余部分
 		return
 	fi
 
 	if [ "$TERMUX_ON_DEVICE_BUILD" = "true" ] && [ "$TERMUX_PKG_ON_DEVICE_BUILD_NOT_SUPPORTED" = "true" ]; then
-		termux_error_exit "Package '$TERMUX_PKG_NAME' is not available for on-device builds."
+		termux_error_exit "包 '$TERMUX_PKG_NAME' 不适用于设备上构建。"
 	fi
 
-	# Delete and re-create the directories used for building the package
+	# 删除并重新创建用于构建包的目录
 	termux_step_setup_build_folders
 
 	if [ "$TERMUX_PKG_BUILD_IN_SRC" = "true" ]; then
-		# Create a file for users to know that the build directory not containing any built files is expected behaviour
-		echo "Building in src due to TERMUX_PKG_BUILD_IN_SRC being set to true" > "$TERMUX_PKG_BUILDDIR_ORIG/BUILDING_IN_SRC.txt"
+		# 创建一个文件供用户知道不包含任何构建文件的构建目录是预期行为
+		echo "由于 TERMUX_PKG_BUILD_IN_SRC 设置为 true，在 src 中构建" > "$TERMUX_PKG_BUILDDIR_ORIG/BUILDING_IN_SRC.txt"
 	fi
 
 	if [ "$TERMUX_PACKAGE_LIBRARY" = "bionic" ]; then
@@ -136,9 +134,9 @@ termux_step_start_build() {
 			chmod u+x "$TERMUX_ELF_CLEANER"
 		fi
 
-		# Some packages search for libutil, libpthread and librt even
-		# though this functionality is provided by libc.  Provide
-		# library stubs so that such configure checks succeed.
+		# 某些包搜索 libutil、libpthread 和 librt，即使
+		# 此功能由 libc 提供。提供
+		# 库存根，以便此类配置检查成功。
 		mkdir -p "$TERMUX_PREFIX/lib"
 		for lib in libutil.so libpthread.so librt.so; do
 			if [ ! -f $TERMUX_PREFIX/lib/$lib ]; then

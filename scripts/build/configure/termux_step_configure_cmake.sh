@@ -31,8 +31,8 @@ termux_step_configure_cmake() {
 		CMAKE_ADDITIONAL_ARGS+=("-DCMAKE_LINKER=$(command -v $LD) $LDFLAGS")
 	fi
 
-	# XXX: CMAKE_{AR,RANLIB} needed for at least jsoncpp build to not
-	# pick up cross compiled binutils tool in $TERMUX_PREFIX/bin:
+	# 注意：CMAKE_{AR,RANLIB} 至少对于 jsoncpp 构建是必需的，以避免
+	# 在 $TERMUX_PREFIX/bin 中拾取交叉编译的 binutils 工具：
 	cmake -G "$TERMUX_PKG_CMAKE_BUILD" "$TERMUX_PKG_SRCDIR" \
 		-DCMAKE_AR="$(command -v $AR)" \
 		-DCMAKE_UNAME="$(command -v uname)" \

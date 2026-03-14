@@ -23,8 +23,8 @@ termux_setup_crystal() {
 	else
 		if [[ "$TERMUX_APP_PACKAGE_MANAGER" = "apt" && "$(dpkg-query -W -f '${db:Status-Status}\n' crystal 2>/dev/null)" != "installed" ]] ||
                    [[ "$TERMUX_APP_PACKAGE_MANAGER" = "pacman" && ! "$(pacman -Q crystal 2>/dev/null)" ]]; then
-			echo "Package 'crystal' is not installed."
-			echo "You can install it with"
+			echo "未安装 'crystal' 软件包。"
+			echo "您可以通过以下方式安装："
 			echo
 			echo "  pkg install crystal"
 			echo
