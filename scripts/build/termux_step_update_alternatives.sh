@@ -7,8 +7,7 @@
 termux_parse_alternatives() {
 	local line key value
 	local dependents=0
-	while IFS=
-\n' read -r line; do
+	while IFS=$'\n' read -r line; do
 
 		key="${line%%:*}" # Part before the first ':'
 		value="${line#*:[[:blank:]]*}" # Part after the first `:`, leading whitespace stripped
@@ -23,8 +22,7 @@ termux_parse_alternatives() {
 
 		if (( dependents )); then
 			read -r dep_link dep_name dep_alternative <<< "$line"
-			DEPENDENTS[${NAME[-1]}]+="      --slave \"${TERMUX_PREFIX}/${dep_link}\" \"${dep_name}\" \"${TERMUX_PREFIX}/${dep_alternative}\""
- \\\n'
+			DEPENDENTS[${NAME[-1]}]+="      --slave \"${TERMUX_PREFIX}/${dep_link}\" \"${dep_name}\" \"${TERMUX_PREFIX}/${dep_alternative}\""$' \\\n'
 		fi
 
 	done < <(sed -e 's|\s*#.*$||g' "$1") # Strip out any comments
@@ -48,27 +46,25 @@ termux_step_update_alternatives() {
 			: "${DEPENDENTS[$name]:=}"
 		done
 
-		{ # 插入替代方案
-		# 如果有 'postinst.orig'，则使用原始的 shebang
+		{ # Splice in the alternatives
+		# Use the original shebang if there's a 'postinst.orig'
 		[[ -f postinst.orig ]] && head -n1 postinst.orig || echo "#!${TERMUX_PREFIX}/bin/sh"
-		# 样板页眉注释和检查
+		# Boilerplate header comment and checks
 		echo "# Automatically added by termux_step_update_alternatives"
 		echo "if [ \"\$1\" = 'configure' ] || [ \"\$1\" = 'abort-upgrade' ] || [ \"\$1\" = 'abort-deconfigure' ] || [ \"\$1\" = 'abort-remove' ] || [ \"${TERMUX_PACKAGE_FORMAT}\" = 'pacman' ]; then"
 		echo "  if [ -x \"${TERMUX_PREFIX}/bin/update-alternatives\" ]; then"
-		# 每个组的 'update-alternatives' 命令
+		# 'update-alternatives' command for each group
 		for name in "${NAME[@]}"; do
-			# 主替代组
+			# Main alternative group
 			printf '%b' \
 				"    # ${name}\n" \
-				"    update-alternatives" 
- \\\n' \
+				"    update-alternatives" $' \\\n' \
 				"      --install \"${TERMUX_PREFIX}/${LINK[$name]}\" \"${name}\" \"${TERMUX_PREFIX}/${ALTERNATIVE[$name]}\" ${PRIORITY[$name]}"
-			# 如果我们有依赖项，则也添加它们
+			# If we have dependents, add those as well
 			if [[ -n "${DEPENDENTS[$name]}" ]]; then
-				# 我们需要在 --install 行中添加一个 ' \<lf>'，
-				# 并从依赖项中删除最后一个 ' \<lf>'。
-				printf ' \\\n%s' "${DEPENDENTS[$name]%
- \\\n'}"
+				# We need to add a ' \<lf>' to the --install line,
+				# and remove the last ' \<lf>' from the dependents.
+				printf ' \\\n%s' "${DEPENDENTS[$name]%$' \\\n'}"
 			fi
 			echo ""
 		done
