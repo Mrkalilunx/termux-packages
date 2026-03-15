@@ -29,7 +29,7 @@ termux_step_massage() {
 	rm -f share/icons/hicolor/icon-theme.cache
 
 	# Remove locale files we're not interested in:
-	rm -Rf share/locale
+	# rm -Rf share/locale
 
 	# Remove ldconfig cache:
 	rm -f glibc/etc/ld{,32}.so.cache

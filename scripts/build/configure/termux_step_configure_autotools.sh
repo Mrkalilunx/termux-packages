@@ -6,10 +6,10 @@ termux_step_configure_autotools() {
 		ENABLE_STATIC=""
 	fi
 
-	local DISABLE_NLS="--disable-nls"
-	if [ "$TERMUX_PKG_EXTRA_CONFIGURE_ARGS" != "${TERMUX_PKG_EXTRA_CONFIGURE_ARGS/--enable-nls/}" ]; then
-		# 如果软件包明确启用了 nls，则不要禁用它（例如 gettext 本身）
-		DISABLE_NLS=""
+	local DISABLE_NLS=""
+	if [ "$TERMUX_PKG_EXTRA_CONFIGURE_ARGS" != "${TERMUX_PKG_EXTRA_CONFIGURE_ARGS/--disable-nls/}" ]; then
+		# 如果软件包明确禁用了 nls，则禁用它
+		DISABLE_NLS="--disable-nls"
 	fi
 
 	local ENABLE_SHARED="--enable-shared"

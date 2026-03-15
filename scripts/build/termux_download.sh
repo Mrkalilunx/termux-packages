@@ -9,6 +9,13 @@ termux_download() {
 	local DESTINATION="$2"
 	local CHECKSUM="${3:-SKIP_CHECKSUM}"
 
+	# 自动替换下载URL为镜像加速
+	# GitHub镜像加速
+	if [[ "$URL" =~ ^https?://github\.com/ ]]; then
+		URL="https://gh.llkk.cc/${URL}"
+		echo "使用GitHub镜像加速下载"
+	fi
+
 	if [[ "$URL" =~ ^file://(/[^/]+)+$ ]]; then
 		local source="${URL:7}" # 移除 `file://` 前缀
 
