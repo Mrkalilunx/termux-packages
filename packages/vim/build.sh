@@ -3,7 +3,7 @@ TERMUX_PKG_DESCRIPTION="Vi IMproved - enhanced vi editor"
 TERMUX_PKG_LICENSE="VIM License"
 TERMUX_PKG_MAINTAINER="Joshua Kahn <tom@termux.dev>"
 TERMUX_PKG_BUILD_DEPENDS="luajit, perl, python, ruby, tcl"
-TERMUX_PKG_DEPENDS="libiconv, libsodium, ncurses"
+TERMUX_PKG_DEPENDS="libiconv, libsodium, ncurses, gettext"
 TERMUX_PKG_SUGGESTS="luajit, perl, python, ruby, tcl"
 TERMUX_PKG_RECOMMENDS="diffutils, xxd"
 TERMUX_PKG_CONFLICTS="vim-gtk"
@@ -25,6 +25,7 @@ vim_cv_tgetent=zero
 vim_cv_toupper_broken=no
 vim_cv_tty_group=world
 ac_cv_small_wchar_t=no
+--enable-nls
 --with-features=huge
 --enable-netbeans=no
 --with-tlib=ncursesw
@@ -109,6 +110,15 @@ termux_step_pre_configure() {
 
 # shellcheck disable=SC2031
 termux_step_post_make_install() {
+	# Install locale files for internationalization support
+	mkdir -p "$TERMUX_PREFIX/share/locale"
+	for po_file in src/po/*.po; do
+		if [ -f "$po_file" ]; then
+			lang=$(basename "$po_file" .po)
+			msgfmt "$po_file" -o "$TERMUX_PREFIX/share/locale/$lang/LC_MESSAGES/vim.mo"
+		fi
+	done
+
 	sed -e "s%\@TERMUX_PREFIX\@%${TERMUX_PREFIX}%g" "$TERMUX_PKG_BUILDER_DIR/vimrc" \
 		> "$TERMUX_PREFIX/share/vim/vimrc"
 
