@@ -495,3 +495,5 @@ jobs:
             fi
           fi
         done
+
+# trigger workflow registration
