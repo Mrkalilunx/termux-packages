@@ -1,0 +1,8 @@
+name: zz-selftest
+on:
+  workflow_dispatch:
+jobs:
+  noop:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ok
