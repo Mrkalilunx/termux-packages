@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-26.04
     strategy:
       matrix:
-        target_arch: ${{ github.event.inputs['target-arch'] || 'aarch64' }}
+        target_arch: ${{ fromJSON(format('["{0}"]', github.event.inputs['target-arch'] || 'aarch64')) }}
       fail-fast: false
     steps:
     - name: Clone repository
