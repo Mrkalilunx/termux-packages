@@ -18,6 +18,10 @@ on:
         description: "Extra CPU optimization flags, for example -O3 -march=armv8.2-a+dotprod+crypto+fp16 -mtune=cortex-a77, leave empty to build the default way"
         required: false
         default: ""
+      cpusuffix:
+        description: "CPU suffix for deb filenames, for example cortexa77, leave empty to keep the target arch in filenames"
+        required: false
+        default: ""
 
 permissions: {} # none
 
@@ -299,8 +303,10 @@ jobs:
       if: ${{ steps.build-info.outputs.skip-building != 'true' }}
       env:
         TERMUX_PKG_CPU_OPTIMIZATION: ${{ github.event.inputs['cpu-opt'] }}
+        TERMUX_PKG_CPUSUFFIX: ${{ github.event.inputs['cpusuffix'] }}
       run: |
         echo "TERMUX_PKG_CPU_OPTIMIZATION=${TERMUX_PKG_CPU_OPTIMIZATION:-}"
+        echo "TERMUX_PKG_CPUSUFFIX=${TERMUX_PKG_CPUSUFFIX:-}"
         declare -a packages=()
         for repo_path in $(jq --raw-output 'del(.pkg_format) | keys | .[]' repo.json); do
           repo=$(jq --raw-output '.["'${repo_path}'"].name' repo.json)

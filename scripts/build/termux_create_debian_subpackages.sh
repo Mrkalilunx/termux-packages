@@ -151,7 +151,13 @@ termux_create_debian_subpackages() {
 			-cJf "$SUB_PKG_PACKAGE_DIR/control.tar.xz" -H gnu .
 
 		# Create the actual .deb file:
-		TERMUX_SUBPKG_DEBFILE=$TERMUX_OUTPUT_DIR/${SUB_PKG_NAME}${DEBUG}_${TERMUX_PKG_FULLVERSION}_${SUB_PKG_ARCH}.deb
+		# 与主包同理:文件名末段可用 CPU 后缀,control 的 Architecture 字段保持目标架构
+		# 平台无关子包架构为 all,保持原样不加后缀
+		local SUB_PKG_DEBARCH=$SUB_PKG_ARCH
+		if [ "$SUB_PKG_ARCH" != "all" ] && [ -n "${TERMUX_PKG_CPUSUFFIX:-}" ]; then
+			SUB_PKG_DEBARCH=$TERMUX_PKG_CPUSUFFIX
+		fi
+		TERMUX_SUBPKG_DEBFILE=$TERMUX_OUTPUT_DIR/${SUB_PKG_NAME}${DEBUG}_${TERMUX_PKG_FULLVERSION}_${SUB_PKG_DEBARCH}.deb
 		[[ -f "$TERMUX_COMMON_CACHEDIR/debian-binary" ]] || echo "2.0" > "$TERMUX_COMMON_CACHEDIR/debian-binary"
 		${AR-ar} cr "$TERMUX_SUBPKG_DEBFILE" \
 				   "$TERMUX_COMMON_CACHEDIR/debian-binary" \

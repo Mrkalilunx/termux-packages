@@ -66,7 +66,14 @@ termux_step_create_debian_package() {
 		-cJf "$TERMUX_PKG_PACKAGEDIR/control.tar.xz" -H gnu .
 
 	test ! -f "$TERMUX_COMMON_CACHEDIR/debian-binary" && echo "2.0" > "$TERMUX_COMMON_CACHEDIR/debian-binary"
-	TERMUX_PKG_DEBFILE=$TERMUX_OUTPUT_DIR/${TERMUX_PKG_NAME}${DEBUG}_${TERMUX_PKG_FULLVERSION}_${TERMUX_ARCH}.deb
+	# 用户传入 CPU 后缀时,deb 文件名末段用该后缀代替目标架构,便于与默认架构包区分
+	# 仅改文件名,control 里的 Architecture 字段仍为目标架构,保证 dpkg/apt 正常安装
+	# 平台无关包的架构为 all,保持原样不加后缀
+	local TERMUX_PKG_DEBARCH=$TERMUX_ARCH
+	if [ "$TERMUX_ARCH" != "all" ] && [ -n "${TERMUX_PKG_CPUSUFFIX:-}" ]; then
+		TERMUX_PKG_DEBARCH=$TERMUX_PKG_CPUSUFFIX
+	fi
+	TERMUX_PKG_DEBFILE=$TERMUX_OUTPUT_DIR/${TERMUX_PKG_NAME}${DEBUG}_${TERMUX_PKG_FULLVERSION}_${TERMUX_PKG_DEBARCH}.deb
 	# Create the actual .deb file:
 	${AR-ar} cr "$TERMUX_PKG_DEBFILE" \
 		"$TERMUX_COMMON_CACHEDIR/debian-binary" \
