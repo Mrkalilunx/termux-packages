@@ -23,6 +23,15 @@ termux_step_setup_toolchain() {
 		fi
 		termux_setup_toolchain_gnu
 	fi
+
+	# 用户传入 CPU 优化标志时追加到编译标志,未传入则与默认构建完全一致
+	# 位置必须在工具链函数之后,工具链函数开头会清空 CFLAGS
+	# 多架构包的第二阶段会再次进入本函数,标志同样生效
+	if [ -n "${TERMUX_PKG_CPU_OPTIMIZATION:-}" ]; then
+		export CFLAGS="${CFLAGS} ${TERMUX_PKG_CPU_OPTIMIZATION}"
+		export CXXFLAGS="${CXXFLAGS} ${TERMUX_PKG_CPU_OPTIMIZATION}"
+		export CPPFLAGS="${CPPFLAGS} ${TERMUX_PKG_CPU_OPTIMIZATION}"
+	fi
 }
 
 termux_step_setup_multilib_environment() {
