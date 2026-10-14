@@ -256,7 +256,7 @@ jobs:
         fi
 
     - name: Enable zram
-      if: ${{ steps.build-info.outputs.skip-building != 'true' }}
+      if: false
       uses: ./.github/actions/zram
       with:
         algorithm: zstd
@@ -495,5 +495,3 @@ jobs:
             fi
           fi
         done
-
-# trigger workflow registration
