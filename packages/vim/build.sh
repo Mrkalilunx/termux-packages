@@ -105,6 +105,16 @@ termux_step_pre_configure() {
 		-e "s%\@RUBY_PLATFORM\@%${TERMUX_HOST_PLATFORM}%g" \
 		-e "s%\@TERMUX_PREFIX\@%${TERMUX_PREFIX}%g" \
 		"$patch" | patch --silent -p1
+
+	# cpu-opt 带哨兵宏时,只给正则引擎对象单独加 -O3,其余文件保持默认 -Oz
+	# 补丁用 .diff 后缀,不会被自动应用,因此默认构建不受影响
+	if [[ "${CFLAGS}" == *TERMUX_CPU_REGEXP_ONLY* ]]; then
+		local regexp_patch="$TERMUX_PKG_BUILDER_DIR/regexpo3.diff"
+		echo "Applying patch: $(basename "$regexp_patch")"
+		patch -p1 < "$regexp_patch"
+		grep -q -- '-o $@ -O3 regexp.c' src/Makefile \
+			|| termux_error_exit "regexpo3.diff 未能生效"
+	fi
 }
 
 # shellcheck disable=SC2031

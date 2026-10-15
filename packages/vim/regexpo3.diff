@@ -1,0 +1,5 @@
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -3626 +3626 @@
+-	$(CCC) -o $@ regexp.c
++	$(CCC) -o $@ -O3 regexp.c
